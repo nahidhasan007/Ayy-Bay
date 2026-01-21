@@ -19,6 +19,7 @@ import com.ayybay.app.presentation.component.AddTransactionDialog
 import com.ayybay.app.presentation.component.MonthlyChart
 import com.ayybay.app.presentation.component.PrayerTimesCard
 import com.ayybay.app.presentation.component.TransactionCard
+import com.ayybay.app.presentation.component.WelcomeMessage
 import com.ayybay.app.presentation.mvi.TransactionUiState
 import java.math.BigDecimal
 import java.util.Calendar
@@ -65,7 +66,7 @@ fun HomeScreen(
     ) { paddingValues ->
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(paddingValues)
         ) {
             if (uiState.isLoading) {
@@ -87,6 +88,10 @@ fun HomeScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
+                    }
+
+                    item {
+                        WelcomeMessage()
                     }
 
                     // Monthly Summary Header

@@ -119,7 +119,7 @@ fun TransactionCard(
 
 private fun formatAmount(amount: Double, type: TransactionType): String {
     val sign = if (type == TransactionType.INCOME) "+" else "-"
-    return "$sign$${String.format("%.2f", amount)}"
+    return "${sign} TK ${String.format("%.2f", amount)}"
 }
 
 private fun formatDate(date: Date): String {

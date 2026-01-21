@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Permissions for notifications -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Permissions for exact alarms (required for prayer times) -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
+    <!-- Permissions for boot receiver to reschedule alarms after restart -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Permissions for location-based prayer times -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- CRITICAL: Foreground Service permission for Android 14+ -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- CRITICAL: Alarm audio playback - bypass Doze mode restrictions -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Optional: Request to ignore battery optimizations (user approval needed) -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:name=".AyyBayApplication"
@@ -17,6 +35,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MVIAPP">
+
+        <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -29,6 +49,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Boot Receiver - Reschedules prayer alarms after device restart -->
         <receiver
             android:name=".receiver.AzanBootReceiver"
             android:enabled="true"
@@ -36,13 +57,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 
+        <!-- Adhan Alarm Receiver - Triggered by AlarmManager -->
         <receiver
             android:name=".receiver.AzanNotificationReceiver"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- CRITICAL: Adhan Foreground Service - Required for audio playback -->
+        <!-- Type "mediaPlayback" is appropriate for Adhan audio service -->
+        <service
+            android:name=".service.AdhanForegroundService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
     </application>
 
 </manifest>

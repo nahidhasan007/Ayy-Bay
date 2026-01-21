@@ -1,5 +1,6 @@
 [versions]
-agp = "8.12.0"
+adhan = "1.2.1"
+agp = "8.11.1"
 kotlin = "2.0.21"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -17,6 +18,7 @@ datastore = "1.0.0"
 koin = "3.5.3"
 
 [libraries]
+adhan = { module = "com.batoulapps.adhan:adhan", version.ref = "adhan" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

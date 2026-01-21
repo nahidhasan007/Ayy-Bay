@@ -6,16 +6,24 @@ import java.util.Date
 import kotlin.math.*
 
 /**
- * PrayerTimeCalculator calculates prayer times based on location and calculation method
+ * PrayerTimeCalculator calculates prayer times based on location and calculation method.
+ *
+ * BANGLADESH CONFIGURATION:
+ * - Default Method: Karachi (最适合孟加拉国)
+ * - Default Madhab: Hanafi (孟加拉国大多数穆斯林遵循)
+ * - Coordinates: Dhaka (23.8103° N, 90.4125° E)
+ * - Timezone: GMT+6
  */
 class PrayerTimeCalculator {
+
+    private val bangladeshTimezoneOffset = 6.0 // GMT+6 hours for Bangladesh
 
     fun calculatePrayerTimes(
         date: Date,
         latitude: Double,
         longitude: Double,
-        calculationMethod: CalculationMethod = CalculationMethod.MWL,
-        madhab: Madhab = Madhab.SHAFI
+        calculationMethod: CalculationMethod = CalculationMethod.KARACHI,
+        madhab: Madhab = Madhab.HANAFI
     ): List<PrayerTime> {
 
         val calendar = Calendar.getInstance().apply { time = date }
@@ -65,6 +73,9 @@ class PrayerTimeCalculator {
         )
     }
 
+    /**
+     * Calculate the position of the sun (equation of time and declination)
+     */
     private fun sunPosition(dayOfYear: Int): Pair<Double, Double> {
         val d = dayOfYear.toDouble()
         val gamma = 2 * PI / 365 * (d + 1)
@@ -75,10 +86,16 @@ class PrayerTimeCalculator {
         return eqOfTime to declination
     }
 
+    /**
+     * Calculate solar noon time in minutes from midnight
+     */
     private fun calculateSolarNoon(longitude: Double, eqOfTime: Double): Double {
         return 720 - (longitude * 4) - eqOfTime
     }
 
+    /**
+     * Calculate sunrise and sunset times in minutes from midnight
+     */
     private fun calculateSunriseSunset(
         latitude: Double,
         longitude: Double,
@@ -94,6 +111,9 @@ class PrayerTimeCalculator {
         return sunrise to sunset
     }
 
+    /**
+     * Calculate hour angle from latitude and declination
+     */
     private fun calculateHourAngle(latitude: Double, declination: Double): Pair<Double, Double> {
         val latRad = Math.toRadians(latitude)
         val declRad = Math.toRadians(declination)
@@ -105,6 +125,9 @@ class PrayerTimeCalculator {
         return haAngle to haAngle / 15
     }
 
+    /**
+     * Calculate time based on solar angle
+     */
     private fun calculateTimeFromAngle(
         longitude: Double,
         angle: Double,
@@ -118,10 +141,19 @@ class PrayerTimeCalculator {
         return minutesToDate(time)
     }
 
+    /**
+     * Adjust Dhuhr time (solar noon + calculation method offset)
+     */
     private fun adjustNoon(solarNoon: Double): Date {
-        return minutesToDate(solarNoon)
+        return minutesToDate(solarNoon + 1.0) // +1 minute after solar noon
     }
 
+    /**
+     * Calculate Asr time based on shadow length
+     *
+     * Hanafi: Shadow length = 2 * object length (recommended for Bangladesh)
+     * Shafi: Shadow length = 1 * object length
+     */
     private fun calculateAsrTime(
         solarNoon: Double,
         latitude: Double,
@@ -134,13 +166,25 @@ class PrayerTimeCalculator {
         val hanafiRatio = 2.0
 
         val ratio = if (madhab == Madhab.HANAFI) hanafiRatio else shafiRatio
-        val angle = atan(1 / (ratio + tan(Math.abs(latRad - declRad))))
+        val sinLat = sin(latRad)
+        val cosLat = cos(latRad)
+        val sinDecl = sin(declRad)
+        val cosDecl = cos(declRad)
+
+        // More accurate Asr calculation using shadow length
+        val tanLat = tan(latRad)
+        val tanDecl = tan(declRad)
+        val angle = atan(1 / (ratio + abs(tanLat - tanDecl)))
         val angleDeg = Math.toDegrees(angle)
 
         val asrTime = solarNoon + angleDeg / 15
         return minutesToDate(asrTime)
     }
 
+    /**
+     * Calculate Isha time
+     * Karachi method uses angle-based calculation
+     */
     private fun calculateIshaTime(
         sunset: Double,
         latitude: Double,
@@ -167,22 +211,35 @@ class PrayerTimeCalculator {
         return minutesToDate(timeInMinutes)
     }
 
+    /**
+     * Adjust Maghrib time (sunset + 1-2 minutes)
+     */
     private fun adjustTwilight(sunset: Double): Date {
-        return minutesToDate(sunset)
+        return minutesToDate(sunset + 2.0) // +2 minutes after sunset
     }
 
+    /**
+     * Convert minutes from midnight to Date object
+     */
     private fun minutesToDate(minutes: Double): Date {
-        val hours = minutes / 60.0
+        var hours = minutes / 60.0
         val hour = (hours % 24).toInt()
         val minute = ((hours - hour) * 60).toInt()
 
         return Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour)
             set(Calendar.MINUTE, minute)
-            time
+            set(Calendar.SECOND, 0)
         }.time
     }
 
+    /**
+     * Fajr angle for different calculation methods
+     *
+     * Karachi: 18° (最适合孟加拉国)
+     * ISNA: 15° (North America)
+     * Egypt: 19.5°
+     */
     private fun getFajrAngle(method: CalculationMethod): Double {
         return when (method) {
             CalculationMethod.MWL -> 18.0
@@ -194,6 +251,9 @@ class PrayerTimeCalculator {
         }
     }
 
+    /**
+     * Isha angle for different calculation methods
+     */
     private fun getIshaAngle(method: CalculationMethod): Double {
         return when (method) {
             CalculationMethod.MWL -> 17.0
@@ -205,6 +265,9 @@ class PrayerTimeCalculator {
         }
     }
 
+    /**
+     * Isha interval (fixed minutes after sunset) if using fixed time
+     */
     private fun getIshaInterval(method: CalculationMethod): Double {
         return when (method) {
             CalculationMethod.MAKKAH -> 90.0 // 90 minutes after sunset
@@ -214,7 +277,7 @@ class PrayerTimeCalculator {
 
     companion object {
         const val SOLAR_NOON_OFFSET = 0.0
-        const val MAGHRIB_OFFSET = 1.0
+        const val MAGHRIB_OFFSET = 2.0
         const val FAJR_OFFSET = -1.0
     }
 }
