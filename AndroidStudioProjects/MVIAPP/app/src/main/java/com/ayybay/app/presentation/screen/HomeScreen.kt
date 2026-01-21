@@ -12,10 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.model.Transaction
 import com.ayybay.app.domain.model.TransactionType
 import com.ayybay.app.presentation.component.AddTransactionDialog
 import com.ayybay.app.presentation.component.MonthlyChart
+import com.ayybay.app.presentation.component.PrayerTimesCard
 import com.ayybay.app.presentation.component.TransactionCard
 import com.ayybay.app.presentation.mvi.TransactionUiState
 import java.math.BigDecimal
@@ -29,6 +31,8 @@ fun HomeScreen(
     onAddTransaction: (Transaction) -> Unit,
     onUpdateTransaction: (Transaction) -> Unit,
     onDeleteTransaction: (Transaction) -> Unit,
+    prayerTimes: List<com.ayybay.app.domain.model.PrayerTime> = emptyList(),
+    onTogglePrayerNotification: (PrayerName, Boolean) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
@@ -73,6 +77,18 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
+                    // Prayer Times Card
+                    if (prayerTimes.isNotEmpty()) {
+                        item {
+                            PrayerTimesCard(
+                                prayerTimes = prayerTimes,
+                                onToggleNotification = onTogglePrayerNotification,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+
                     // Monthly Summary Header
                     item {
                         val (totalIncome, totalExpense) = calculateTotals(uiState.transactions)
@@ -283,7 +299,7 @@ private fun StatItem(
             color = color.copy(alpha = 0.7f)
         )
         Text(
-            text = "$${String.format("%.2f", amount)}",
+            text = "TK ${String.format("%.2f", amount)}",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = color
