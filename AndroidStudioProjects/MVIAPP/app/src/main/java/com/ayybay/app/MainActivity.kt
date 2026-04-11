@@ -1,11 +1,9 @@
 package com.ayybay.app
 
 import android.app.AlarmManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -15,15 +13,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -32,14 +29,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.ayybay.app.alarm.PrayerAlarmScheduler
 import com.ayybay.app.presentation.mvi.TransactionUiIntent
 import com.ayybay.app.presentation.screen.HomeScreen
-import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
+import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.service.AdhanForegroundService
 import com.ayybay.app.ui.theme.MVIAPPTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import com.ayybay.app.alarm.PrayerAlarmScheduler
 
 class MainActivity : ComponentActivity() {
 
@@ -202,13 +199,13 @@ class MainActivity : ComponentActivity() {
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .padding(vertical = 16.dp)
                 .background(
                     color = Color(0xFF047857),
                 ),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF047857), // Emerald-700
-                contentColor = Color.White
+                containerColor = Color.Transparent, // Emerald-700
+                contentColor = Color.Transparent
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
         ) {

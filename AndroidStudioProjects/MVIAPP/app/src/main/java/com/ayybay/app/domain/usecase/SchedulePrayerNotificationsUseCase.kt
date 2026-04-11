@@ -30,10 +30,10 @@ class SchedulePrayerNotificationsUseCase(
         val settings = prayerTimeRepository.getPrayerSettings().first()
 
         // Use default location if not set (e.g., Makkah)
-        val latitude = settings.locationLatitude ?: 21.4225
-        val longitude = settings.locationLongitude ?: 39.8262
-        val calculationMethod = settings.calculationMethod ?: CalculationMethod.MWL
-        val madhab = settings.madhab ?: Madhab.SHAFI
+        val latitude = settings.locationLatitude ?: 23.81
+        val longitude = settings.locationLongitude ?: 90.41
+        val calculationMethod = settings.calculationMethod
+        val madhab = settings.madhab
 
         // Calculate prayer times
         val prayerTimes = prayerTimeCalculator.calculatePrayerTimes(

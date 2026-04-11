@@ -28,13 +28,14 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
     uiState: TransactionUiState,
     onAddTransaction: (Transaction) -> Unit,
     onUpdateTransaction: (Transaction) -> Unit,
     onDeleteTransaction: (Transaction) -> Unit,
     prayerTimes: List<com.ayybay.app.domain.model.PrayerTime> = emptyList(),
     onTogglePrayerNotification: (PrayerName, Boolean) -> Unit = { _, _ -> },
-    modifier: Modifier = Modifier
+
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<Transaction?>(null) }
