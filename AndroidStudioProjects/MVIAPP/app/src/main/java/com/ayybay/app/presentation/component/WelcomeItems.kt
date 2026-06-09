@@ -1,26 +1,45 @@
 package com.ayybay.app.presentation.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun WelcomeMessage() {
-    Text(
-        text = "🕌 Welcome to Adhan App\n\nPrayer Times:\n• Fajr: 5:00 AM\n• Johr: 1:00 PM\n• Asar: 5:00 PM\n• Magrib: 6:10 PM\n• Esha: 8:00 PM",
-        fontSize = 16.sp,
-        textAlign = TextAlign.Center,
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .background(Color(0xFFE8F5E9))
-            .padding(16.dp)
-    )
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "🌙", fontSize = 28.sp, modifier = Modifier.padding(end = 12.dp))
+            Column {
+                Text(
+                    text = "Ayy Bay",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = "Prayer times are calculated for Dhaka, Bangladesh using the Karachi method.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.75f)
+                )
+            }
+        }
+    }
 }

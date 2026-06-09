@@ -3,12 +3,11 @@ package com.ayybay.app.domain.usecase
 import com.ayybay.app.data.PrayerTimeCalculator
 import com.ayybay.app.data.local.PrayerTimeDao
 import com.ayybay.app.data.mapper.PrayerTimeMapper
-import com.ayybay.app.domain.model.CalculationMethod
-import com.ayybay.app.domain.model.Madhab
+import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.repository.PrayerTimeRepository
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 import java.util.Date
-import kotlinx.coroutines.flow.first
 
 class SchedulePrayerNotificationsUseCase(
     private val prayerTimeRepository: PrayerTimeRepository,
@@ -16,43 +15,42 @@ class SchedulePrayerNotificationsUseCase(
     private val prayerTimeDao: PrayerTimeDao
 ) {
     suspend operator fun invoke() {
-        val calendar = Calendar.getInstance()
-
-        // Calculate and schedule for today and next 6 days
-        for (i in 0..6) {
-            val date = Date(calendar.timeInMillis + (i * 24 * 60 * 60 * 1000))
-            schedulePrayersForDate(date)
-        }
-    }
-
-    private suspend fun schedulePrayersForDate(date: Date) {
-        // Get prayer settings to get location
         val settings = prayerTimeRepository.getPrayerSettings().first()
+        val latitude = settings.locationLatitude ?: 23.8103
+        val longitude = settings.locationLongitude ?: 90.4125
 
-        // Use default location if not set (e.g., Makkah)
-        val latitude = settings.locationLatitude ?: 23.81
-        val longitude = settings.locationLongitude ?: 90.41
-        val calculationMethod = settings.calculationMethod
-        val madhab = settings.madhab
+        val now = Date()
+        val today = now
+        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.time
 
-        // Calculate prayer times
-        val prayerTimes = prayerTimeCalculator.calculatePrayerTimes(
+        val todayPrayers = prayerTimeCalculator.calculatePrayerTimes(
+            date = today,
             latitude = latitude,
             longitude = longitude,
-            date = date,
-            calculationMethod = calculationMethod,
-            madhab = madhab
+            calculationMethod = settings.calculationMethod,
+            madhab = settings.madhab
+        )
+        val tomorrowPrayers = prayerTimeCalculator.calculatePrayerTimes(
+            date = tomorrow,
+            latitude = latitude,
+            longitude = longitude,
+            calculationMethod = settings.calculationMethod,
+            madhab = settings.madhab
         )
 
-        // Save prayer times to database
-        val prayerTimeEntities = prayerTimes.map {
-        PrayerTimeMapper.toEntity(it, date)
-        }
-        prayerTimeDao.insertPrayerTimes(prayerTimeEntities)
+        // Persist today's prayer times for display
+        prayerTimeDao.insertPrayerTimes(todayPrayers.map { PrayerTimeMapper.toEntity(it, today) })
 
-        // Schedule notifications
-        prayerTimes.forEach { prayerTime ->
-            prayerTimeRepository.schedulePrayerNotification(prayerTime)
+        // Schedule the next occurrence of each prayer (today if not passed, otherwise tomorrow)
+        PrayerName.values().forEach { prayerName ->
+            val todayPrayer = todayPrayers.find { it.prayerName == prayerName } ?: return@forEach
+            val nextPrayer = if (todayPrayer.time.after(now)) todayPrayer
+            else tomorrowPrayers.find { it.prayerName == prayerName } ?: return@forEach
+
+            val enabled = todayPrayer.isEnabled
+            if (enabled) {
+                prayerTimeRepository.schedulePrayerNotification(nextPrayer)
+            }
         }
     }
 }
