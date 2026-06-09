@@ -46,12 +46,12 @@ object PrayerTimeMapper {
                 calculationMethod = try {
                     CalculationMethod.valueOf(entity.calculationMethod)
                 } catch (e: IllegalArgumentException) {
-                    CalculationMethod.MWL
+                    CalculationMethod.KARACHI
                 },
                 madhab = try {
                     Madhab.valueOf(entity.madhab)
                 } catch (e: IllegalArgumentException) {
-                    Madhab.SHAFI
+                    Madhab.HANAFI
                 },
                 notificationsEnabled = entity.notificationsEnabled
             )

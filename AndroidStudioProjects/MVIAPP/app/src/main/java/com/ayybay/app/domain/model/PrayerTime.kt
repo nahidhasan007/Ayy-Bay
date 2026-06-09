@@ -17,10 +17,10 @@ enum class PrayerName(val displayName: String) {
 }
 
 data class PrayerSettings(
-    val locationLatitude: Double? = null,
-    val locationLongitude: Double? = null,
-    val calculationMethod: CalculationMethod = CalculationMethod.MWL,
-    val madhab: Madhab = Madhab.SHAFI,
+    val locationLatitude: Double? = 23.8103,
+    val locationLongitude: Double? = 90.4125,
+    val calculationMethod: CalculationMethod = CalculationMethod.KARACHI,
+    val madhab: Madhab = Madhab.HANAFI,
     val notificationsEnabled: Boolean = true
 )
 

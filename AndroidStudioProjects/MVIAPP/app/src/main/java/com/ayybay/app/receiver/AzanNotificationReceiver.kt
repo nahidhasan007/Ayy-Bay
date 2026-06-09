@@ -1,5 +1,6 @@
 package com.ayybay.app.receiver
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -11,21 +12,16 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.ayybay.app.MainActivity
-import com.ayybay.app.R
+import com.ayybay.app.data.PrayerTimeCalculator
+import com.ayybay.app.domain.model.CalculationMethod
+import com.ayybay.app.domain.model.Madhab
+import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.service.AdhanForegroundService
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * BroadcastReceiver that handles prayer time alarms.
- *
- * CRITICAL: Starts foreground service for Adhan playback.
- * Without foreground service, audio playback would be blocked by:
- * - Android Doze mode
- * - App standby
- * - Background execution limits
- */
 class AzanNotificationReceiver : BroadcastReceiver() {
 
     companion object {
@@ -35,24 +31,18 @@ class AzanNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val prayerName = intent.getStringExtra("prayer_name") ?: "Prayer Time"
-        val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+        val currentTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
 
-        // Create notification channel
         createNotificationChannel(context)
-
-        // Show notification
         showNotification(context, prayerName, currentTime)
 
-        // Start foreground service to play Adhan
-        // CRITICAL: Must be foreground service for reliable audio playback
         AdhanForegroundService.startAdhan(
             context = context,
             prayerName = prayerName,
-            durationSeconds = 90  // Play Adhan for 90 seconds
+            durationSeconds = 90
         )
 
-        // Reschedule for next day (daily repeat)
-        rescheduleForNextDay(context, prayerName, intent)
+        rescheduleForNextDay(context, prayerName)
     }
 
     private fun createNotificationChannel(context: Context) {
@@ -73,7 +63,6 @@ class AzanNotificationReceiver : BroadcastReceiver() {
                         .build()
                 )
             }
-
             val notificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
@@ -83,22 +72,18 @@ class AzanNotificationReceiver : BroadcastReceiver() {
     private fun showNotification(context: Context, prayerName: String, time: String) {
         val notificationIntent = Intent(context, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            notificationIntent,
+            context, 0, notificationIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("🕌 $prayerName Time")
-            .setContentText("Playing Adhan at $time")
+            .setContentText("Adhan playing at $time")
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVibrate(longArrayOf(0, 500, 200, 500))
-            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
             .build()
 
         val notificationManager =
@@ -106,33 +91,52 @@ class AzanNotificationReceiver : BroadcastReceiver() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun rescheduleForNextDay(context: Context, prayerName: String, originalIntent: Intent) {
-        val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE) as? android.app.AlarmManager ?: return
+    private fun rescheduleForNextDay(context: Context, prayerName: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
 
-        // Calculate time for next day (same time, +24 hours)
-        val calendar = java.util.Calendar.getInstance()
-        calendar.add(java.util.Calendar.DAY_OF_MONTH, 1)
+        // Match displayName or name to find the PrayerName enum
+        val prayerNameEnum = PrayerName.values().find {
+            it.displayName.equals(prayerName, ignoreCase = true) ||
+                it.name.equals(prayerName, ignoreCase = true)
+        } ?: return
+
+        // Calculate tomorrow's actual prayer time
+        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }
+        val tomorrowPrayer = try {
+            PrayerTimeCalculator().calculatePrayerTimes(
+                date = tomorrow.time,
+                latitude = 23.8103,
+                longitude = 90.4125,
+                calculationMethod = CalculationMethod.KARACHI,
+                madhab = Madhab.HANAFI
+            ).find { it.prayerName == prayerNameEnum }
+        } catch (e: Exception) {
+            null
+        } ?: return
+
+        val intent = Intent(context, AzanNotificationReceiver::class.java).apply {
+            putExtra("prayer_name", prayerName)
+            putExtra("prayer_time", tomorrowPrayer.time.time)
+            action = "com.ayybay.app.AZAN_NOTIFICATION"
+        }
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            prayerName.hashCode(),
-            originalIntent,
+            prayerNameEnum.ordinal,
+            intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        // Schedule for next day
         try {
             alarmManager.setExactAndAllowWhileIdle(
-                android.app.AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
+                AlarmManager.RTC_WAKEUP,
+                tomorrowPrayer.time.time,
                 pendingIntent
             )
         } catch (e: SecurityException) {
-            // Fallback if exact alarm permission not granted
             alarmManager.setAndAllowWhileIdle(
-                android.app.AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
+                AlarmManager.RTC_WAKEUP,
+                tomorrowPrayer.time.time,
                 pendingIntent
             )
         }

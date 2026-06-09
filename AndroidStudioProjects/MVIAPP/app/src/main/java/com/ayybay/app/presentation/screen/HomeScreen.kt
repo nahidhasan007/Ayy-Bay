@@ -16,14 +16,10 @@ import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.model.Transaction
 import com.ayybay.app.domain.model.TransactionType
 import com.ayybay.app.presentation.component.AddTransactionDialog
-import com.ayybay.app.presentation.component.MonthlyChart
 import com.ayybay.app.presentation.component.PrayerTimesCard
 import com.ayybay.app.presentation.component.TransactionCard
 import com.ayybay.app.presentation.component.WelcomeMessage
 import com.ayybay.app.presentation.mvi.TransactionUiState
-import java.math.BigDecimal
-import java.util.Calendar
-import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,8 +30,7 @@ fun HomeScreen(
     onUpdateTransaction: (Transaction) -> Unit,
     onDeleteTransaction: (Transaction) -> Unit,
     prayerTimes: List<com.ayybay.app.domain.model.PrayerTime> = emptyList(),
-    onTogglePrayerNotification: (PrayerName, Boolean) -> Unit = { _, _ -> },
-
+    onTogglePrayerNotification: (PrayerName, Boolean) -> Unit = { _, _ -> }
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var editingTransaction by remember { mutableStateOf<Transaction?>(null) }
@@ -45,7 +40,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Ayy-Bay",
+                        text = "Ayy Bay",
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -71,31 +66,32 @@ fun HomeScreen(
                 .padding(paddingValues)
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     // Prayer Times Card
-                    if (prayerTimes.isNotEmpty()) {
-                        item {
-                            PrayerTimesCard(
-                                prayerTimes = prayerTimes,
-                                onToggleNotification = onTogglePrayerNotification,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
+                    item {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        PrayerTimesCard(
+                            prayerTimes = prayerTimes,
+                            onToggleNotification = onTogglePrayerNotification,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
+                    // Info card
                     item {
                         WelcomeMessage()
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    // Monthly Summary Header
+                    // Monthly Summary
                     item {
                         val (totalIncome, totalExpense) = calculateTotals(uiState.transactions)
                         MonthlyChartCard(
@@ -105,7 +101,7 @@ fun HomeScreen(
                         )
                     }
 
-                    // Transactions List Header
+                    // Transactions header
                     item {
                         Row(
                             modifier = Modifier
@@ -122,7 +118,7 @@ fun HomeScreen(
                         }
                     }
 
-                    // Transactions List
+                    // Transactions list
                     items(uiState.transactions) { transaction ->
                         TransactionCard(
                             transaction = transaction,
@@ -131,7 +127,7 @@ fun HomeScreen(
                         )
                     }
 
-                    // Empty State
+                    // Empty state
                     if (uiState.transactions.isEmpty()) {
                         item {
                             Box(
@@ -140,9 +136,7 @@ fun HomeScreen(
                                     .padding(32.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text(
                                         text = "No transactions yet",
                                         style = MaterialTheme.typography.titleMedium,
@@ -178,14 +172,12 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = error,
-                            color = MaterialTheme.colorScheme.onErrorContainer
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.weight(1f)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(onClick = { }) {
-                            Text(
-                                text = "✕",
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
+                            Text("✕", color = MaterialTheme.colorScheme.onErrorContainer)
                         }
                     }
                 }
@@ -193,7 +185,6 @@ fun HomeScreen(
         }
     }
 
-    // Add Transaction Dialog
     if (showAddDialog) {
         AddTransactionDialog(
             transaction = null,
@@ -205,7 +196,6 @@ fun HomeScreen(
         )
     }
 
-    // Edit Transaction Dialog
     editingTransaction?.let { transaction ->
         AddTransactionDialog(
             transaction = transaction,
@@ -219,14 +209,8 @@ fun HomeScreen(
 }
 
 private fun calculateTotals(transactions: List<Transaction>): Pair<Double, Double> {
-    val income = transactions
-        .filter { it.type == TransactionType.INCOME }
-        .sumOf { it.amount }
-
-    val expense = transactions
-        .filter { it.type == TransactionType.EXPENSE }
-        .sumOf { it.amount }
-
+    val income = transactions.filter { it.type == TransactionType.INCOME }.sumOf { it.amount }
+    val expense = transactions.filter { it.type == TransactionType.EXPENSE }.sumOf { it.amount }
     return income to expense
 }
 
@@ -250,11 +234,10 @@ private fun MonthlyChartCard(
             Text(
                 text = "This Month",
                 style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -265,9 +248,7 @@ private fun MonthlyChartCard(
                     color = Color(0xFF4CAF50),
                     modifier = Modifier.weight(1f)
                 )
-
                 Spacer(modifier = Modifier.weight(0.2f))
-
                 StatItem(
                     label = "Expense",
                     amount = totalExpense,
@@ -275,9 +256,7 @@ private fun MonthlyChartCard(
                     modifier = Modifier.weight(1f)
                 )
             }
-
             Spacer(modifier = Modifier.height(12.dp))
-
             val balance = totalIncome - totalExpense
             StatItem(
                 label = "Balance",
@@ -296,9 +275,7 @@ private fun StatItem(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-    ) {
+    Column(modifier = modifier) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
