@@ -29,8 +29,7 @@ enum class CalculationMethod(val methodName: String) {
     ISNA("Islamic Society of North America"),
     EGYPT("Egyptian General Authority"),
     MAKKAH("Umm al-Qura University, Makkah"),
-    KARACHI("University of Islamic Sciences, Karachi"),
-    TEHRAN("Institute of Geophysics, University of Tehran")
+    KARACHI("University of Islamic Sciences, Karachi")
 }
 
 enum class Madhab {
