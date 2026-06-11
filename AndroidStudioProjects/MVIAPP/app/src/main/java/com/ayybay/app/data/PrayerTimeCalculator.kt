@@ -44,7 +44,6 @@ class PrayerTimeCalculator {
         CalculationMethod.EGYPT -> AdhanMethod.EGYPTIAN
         CalculationMethod.MAKKAH -> AdhanMethod.UMM_AL_QURA
         CalculationMethod.MWL -> AdhanMethod.MUSLIM_WORLD_LEAGUE
-        CalculationMethod.TEHRAN -> AdhanMethod.TEHRAN
     }
 
     private fun toAdhanMadhab(madhab: Madhab): AdhanMadhab = when (madhab) {
