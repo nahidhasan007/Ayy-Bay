@@ -1,15 +1,17 @@
 package com.ayybay.app.di
 
 import android.content.Context
-import android.app.Application
 import com.ayybay.app.AyyBayViewModel
 import com.ayybay.app.data.PrayerTimeCalculator
 import com.ayybay.app.data.local.AppDatabase
+import com.ayybay.app.data.repository.LinkRepositoryImpl
 import com.ayybay.app.data.repository.TransactionRepositoryImpl
 import com.ayybay.app.data.repository.PrayerTimeRepositoryImpl
+import com.ayybay.app.domain.repository.LinkRepository
 import com.ayybay.app.domain.repository.TransactionRepository
 import com.ayybay.app.domain.repository.PrayerTimeRepository
 import com.ayybay.app.domain.usecase.*
+import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import org.koin.android.ext.koin.androidContext
@@ -22,6 +24,7 @@ val appModule = module {
     single { provideAppDatabase(androidContext()) }
     single { get<AppDatabase>().transactionDao() }
     single { get<AppDatabase>().prayerTimeDao() }
+    single { get<AppDatabase>().linkDao() }
 
     // Prayer Calculator
     single { PrayerTimeCalculator() }
@@ -34,6 +37,7 @@ val appModule = module {
             context = androidContext()
         )
     }
+    single<LinkRepository> { LinkRepositoryImpl(get()) }
 
     // Use Cases - Transaction
     factory { GetAllTransactionsUseCase(get()) }
@@ -48,6 +52,12 @@ val appModule = module {
     factory { UpdatePrayerSettingsUseCase(get()) }
     factory { SchedulePrayerNotificationsUseCase(get(), get(), get()) }
     factory { TogglePrayerNotificationUseCase(get()) }
+
+    // Use Cases - Links
+    factory { GetAllLinksUseCase(get()) }
+    factory { GetLinksByCategoryUseCase(get()) }
+    factory { AddLinkUseCase(get()) }
+    factory { DeleteLinkUseCase(get()) }
 
     // ViewModels
     viewModel {
@@ -73,6 +83,16 @@ val appModule = module {
     viewModel {
         AyyBayViewModel(
             transactionViewModel = get()
+        )
+    }
+
+    viewModel {
+        LinkViewModel(
+            getAllLinksUseCase = get(),
+            getLinksByCategoryUseCase = get(),
+            addLinkUseCase = get(),
+            deleteLinkUseCase = get(),
+            linkRepository = get()
         )
     }
 }

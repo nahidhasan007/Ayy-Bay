@@ -13,11 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
-import com.ayybay.app.presentation.mvi.TransactionUiIntent
-import com.ayybay.app.presentation.screen.HomeScreen
+import com.ayybay.app.presentation.navigation.AppNavigation
+import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.ui.theme.MVIAPPTheme
@@ -27,6 +25,7 @@ class MainActivity : ComponentActivity() {
 
     private val transactionViewModel: TransactionViewModel by viewModel()
     private val prayerViewModel: PrayerViewModel by viewModel()
+    private val linkViewModel: LinkViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,26 +35,12 @@ class MainActivity : ComponentActivity() {
         requestExactAlarmPermission()
 
         setContent {
-            val uiState by transactionViewModel.uiState.collectAsState()
-            val prayerTimes by prayerViewModel.prayerTimes.collectAsState()
-
             MVIAPPTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    HomeScreen(
-                        uiState = uiState,
-                        onAddTransaction = { transaction ->
-                            transactionViewModel.handleIntent(TransactionUiIntent.AddTransaction(transaction))
-                        },
-                        onUpdateTransaction = { transaction ->
-                            transactionViewModel.handleIntent(TransactionUiIntent.UpdateTransaction(transaction))
-                        },
-                        onDeleteTransaction = { transaction ->
-                            transactionViewModel.handleIntent(TransactionUiIntent.DeleteTransaction(transaction))
-                        },
-                        prayerTimes = prayerTimes,
-                        onTogglePrayerNotification = { prayerName, enabled ->
-                            prayerViewModel.togglePrayerNotification(prayerName, enabled)
-                        }
+                    AppNavigation(
+                        transactionViewModel = transactionViewModel,
+                        prayerViewModel = prayerViewModel,
+                        linkViewModel = linkViewModel
                     )
                 }
             }

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MVIAPP" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MVIAPP" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#1B6B3A</item>
+        <item name="colorPrimaryDark">#145230</item>
+        <item name="colorAccent">#C9A84C</item>
+    </style>
+
+    <style name="Theme.MVIAPP.Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">#1B6B3A</item>
+        <item name="titleTextColor">#FFFFFF</item>
+    </style>
+
 </resources>
