@@ -35,8 +35,10 @@ fun LinkWebViewScreen(
 
     val uiState by linkViewModel.uiState.collectAsState()
     val link = uiState.selectedLink
-    val url = link?.url ?: ""
-    val title = link?.title ?: "Loading…"
+    // Ensure we are displaying the link that matches the current linkId
+    val currentLink = if (link?.id == linkId) link else null
+    val url = currentLink?.url ?: ""
+    val title = currentLink?.title ?: "Loading…"
 
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
     var isPageLoading by remember { mutableStateOf(true) }
