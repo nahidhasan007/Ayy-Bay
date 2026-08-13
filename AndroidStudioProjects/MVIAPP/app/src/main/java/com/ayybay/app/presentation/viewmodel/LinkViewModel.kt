@@ -50,7 +50,11 @@ class LinkViewModel(
 
     private fun loadCategories() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null,
+                categories = emptyList()
+            )
 
             getAllLinksUseCase().catch { exception ->
                 _uiState.value = _uiState.value.copy(
@@ -73,7 +77,11 @@ class LinkViewModel(
 
     private fun loadLinksByCategory(category: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null,
+                links = emptyList()
+            )
 
             getLinksByCategoryUseCase(category).catch { exception ->
                 _uiState.value = _uiState.value.copy(
@@ -92,7 +100,11 @@ class LinkViewModel(
 
     private fun loadLinkDetail(id: Long) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null,
+                selectedLink = null
+            )
 
             linkRepository.getLinkById(id).catch { exception ->
                 _uiState.value = _uiState.value.copy(
