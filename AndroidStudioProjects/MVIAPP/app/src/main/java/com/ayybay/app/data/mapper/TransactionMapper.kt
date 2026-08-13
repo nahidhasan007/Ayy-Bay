@@ -12,7 +12,9 @@ object TransactionMapper {
             amount = entity.amount,
             category = entity.category,
             description = entity.description,
-            date = entity.date
+            date = entity.date,
+            paymentMethod = entity.paymentMethod,
+            note = entity.note
         )
     }
 
@@ -23,7 +25,9 @@ object TransactionMapper {
             amount = domain.amount,
             category = domain.category,
             description = domain.description,
-            date = domain.date
+            date = domain.date,
+            paymentMethod = domain.paymentMethod,
+            note = domain.note
         )
     }
 

@@ -8,7 +8,9 @@ data class Transaction(
     val amount: Double,
     val category: String,
     val description: String,
-    val date: Date
+    val date: Date,
+    val paymentMethod: String = "Cash",
+    val note: String = ""
 )
 
 enum class TransactionType {

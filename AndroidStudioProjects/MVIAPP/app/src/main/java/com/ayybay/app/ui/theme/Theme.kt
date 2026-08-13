@@ -24,6 +24,27 @@ val NightBlue = Color(0xFF0D1B2A)
 val NightBlueSurface = Color(0xFF1A2E3D)
 val MoonSilver = Color(0xFFB0BEC5)
 
+// Semantic finance/status colors
+val IncomeGreen = Color(0xFF2E7D32)
+val ExpenseRed = Color(0xFFE53935)
+val BalanceOrange = Color(0xFFF57C00)
+val InfoBlue = Color(0xFF1976D2)
+
+// Light tint backgrounds for stat cards
+val IncomeGreenTint = Color(0xFFE8F5E9)
+val ExpenseRedTint = Color(0xFFFFEBEE)
+val BalanceOrangeTint = Color(0xFFFFF3E0)
+val InfoBlueTint = Color(0xFFE3F2FD)
+
+// Category accent colors (Add Transaction / Expense Categories)
+val CategoryFood = Color(0xFF2E7D32)
+val CategoryTransport = Color(0xFF1976D2)
+val CategoryShopping = Color(0xFF6A1B9A)
+val CategoryBills = Color(0xFFF9A825)
+val CategoryHealth = Color(0xFFD32F2F)
+val CategoryEducation = Color(0xFF1565C0)
+val CategoryOther = Color(0xFF616161)
+
 private val DarkColorScheme = darkColorScheme(
     primary = IslamicGreenLight,
     onPrimary = Color.Black,

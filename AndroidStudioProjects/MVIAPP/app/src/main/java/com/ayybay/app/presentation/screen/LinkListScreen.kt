@@ -114,52 +114,50 @@ private fun LinkItemCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = link.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (link.description.isNotBlank()) {
+                Spacer(Modifier.height(3.dp))
                 Text(
-                    text = link.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
+                    text = link.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (link.description.isNotBlank()) {
-                    Spacer(Modifier.height(3.dp))
-                    Text(
-                        text = link.description,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(Modifier.height(5.dp))
-                Text(
-                    text = domainOf(link.url),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = accentColor
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = domainOf(link.url),
+                style = MaterialTheme.typography.labelSmall,
+                color = accentColor
+            )
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(
+                onClick = onClick,
+                modifier = Modifier.align(Alignment.End),
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = accentColor)
+            ) {
+                Text("Open Website")
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.Default.OpenInBrowser,
+                    contentDescription = "Open",
+                    modifier = Modifier.size(16.dp)
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Icon(
-                imageVector = Icons.Default.OpenInBrowser,
-                contentDescription = "Open",
-                tint = accentColor,
-                modifier = Modifier.size(22.dp)
-            )
         }
     }
 }
