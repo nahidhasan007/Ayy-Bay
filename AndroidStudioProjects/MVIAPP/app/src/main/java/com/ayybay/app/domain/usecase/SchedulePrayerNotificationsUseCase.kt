@@ -5,6 +5,7 @@ import com.ayybay.app.data.local.PrayerTimeDao
 import com.ayybay.app.data.mapper.PrayerTimeMapper
 import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.repository.PrayerTimeRepository
+import com.ayybay.app.util.startOfDayMillis
 import kotlinx.coroutines.flow.first
 import java.util.Calendar
 import java.util.Date
@@ -38,8 +39,10 @@ class SchedulePrayerNotificationsUseCase(
             madhab = settings.madhab
         )
 
-        // Persist today's prayer times for display
-        prayerTimeDao.insertPrayerTimes(todayPrayers.map { PrayerTimeMapper.toEntity(it, today) })
+        // Persist today's prayer times for display, keyed by calendar day (not the exact
+        // insert-time millisecond) so a later lookup with a fresh Date() still matches.
+        val todayKey = Date(today.startOfDayMillis())
+        prayerTimeDao.insertPrayerTimes(todayPrayers.map { PrayerTimeMapper.toEntity(it, todayKey) })
 
         // Schedule the next occurrence of each prayer (today if not passed, otherwise tomorrow)
         PrayerName.values().forEach { prayerName ->

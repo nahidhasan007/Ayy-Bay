@@ -25,6 +25,9 @@ import com.ayybay.app.presentation.screen.JobsScreen
 import com.ayybay.app.presentation.screen.LinkListScreen
 import com.ayybay.app.presentation.screen.LinkWebViewScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
+import com.ayybay.app.presentation.screen.SurahListScreen
+import com.ayybay.app.presentation.screen.SurahWebViewScreen
+import com.ayybay.app.data.local.QuranSurahData
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
@@ -40,6 +43,10 @@ sealed class Screen(val route: String) {
     object Books : Screen("books")
     object BookList : Screen("book_list/{religionId}") {
         fun createRoute(religionId: String) = "book_list/$religionId"
+    }
+    object SurahList : Screen("surah_list")
+    object SurahWebView : Screen("surah_webview/{surahNumber}") {
+        fun createRoute(surahNumber: Int) = "surah_webview/$surahNumber"
     }
     object DailyLinks : Screen("daily_links")
     object LinkList : Screen("link_list/{category}") {
@@ -207,7 +214,31 @@ fun AppNavigation(
                 arguments = listOf(navArgument("religionId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val religionId = backStackEntry.arguments?.getString("religionId") ?: return@composable
-                BookListScreen(religionId = religionId, onBack = { navController.popBackStack() })
+                BookListScreen(
+                    religionId = religionId,
+                    onOpenQuran = { navController.navigate(Screen.SurahList.route) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.SurahList.route) {
+                SurahListScreen(
+                    onSurahClick = { surah -> navController.navigate(Screen.SurahWebView.createRoute(surah.number)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.SurahWebView.route,
+                arguments = listOf(navArgument("surahNumber") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val surahNumber = backStackEntry.arguments?.getInt("surahNumber") ?: return@composable
+                val surah = QuranSurahData.surahs().find { it.number == surahNumber } ?: return@composable
+                SurahWebViewScreen(
+                    url = surah.url,
+                    title = "${surah.number}. ${surah.name}",
+                    onBack = { navController.popBackStack() }
+                )
             }
 
             composable(Screen.DailyLinks.route) {

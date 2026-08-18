@@ -11,6 +11,7 @@ import com.ayybay.app.domain.model.PrayerSettings
 import com.ayybay.app.domain.model.PrayerTime
 import com.ayybay.app.domain.repository.PrayerTimeRepository
 import com.ayybay.app.receiver.AzanNotificationReceiver
+import com.ayybay.app.util.startOfDayMillis
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.Calendar
@@ -23,8 +24,7 @@ class PrayerTimeRepositoryImpl(
 ) : PrayerTimeRepository {
 
     override fun getPrayerTimesForDate(date: Date): Flow<List<PrayerTime>> {
-        val dateInMillis = date.time
-        return prayerTimeDao.getPrayerTimesForDate(dateInMillis).map { entities ->
+        return prayerTimeDao.getPrayerTimesForDate(date.startOfDayMillis()).map { entities ->
             entities.map { PrayerTimeMapper.toDomain(it) }
         }
     }
@@ -40,8 +40,7 @@ class PrayerTimeRepositoryImpl(
     }
 
     override suspend fun togglePrayerNotification(prayerName: PrayerName, enabled: Boolean) {
-        val today = Date()
-        prayerTimeDao.togglePrayerNotification(prayerName.name, today.time, enabled)
+        prayerTimeDao.togglePrayerNotification(prayerName.name, Date().startOfDayMillis(), enabled)
     }
 
     override suspend fun schedulePrayerNotification(prayerTime: PrayerTime) {
