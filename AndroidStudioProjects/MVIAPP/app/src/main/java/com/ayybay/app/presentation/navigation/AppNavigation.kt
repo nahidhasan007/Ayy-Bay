@@ -1,5 +1,7 @@
 package com.ayybay.app.presentation.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -9,10 +11,14 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.*
 import androidx.navigation.compose.*
+import com.ayybay.app.presentation.mvi.AuthUiEffect
+import com.ayybay.app.presentation.mvi.AuthUiIntent
 import com.ayybay.app.presentation.mvi.LinkUiIntent
 import com.ayybay.app.presentation.mvi.TransactionUiIntent
 import com.ayybay.app.presentation.screen.AddTransactionScreen
@@ -24,15 +30,20 @@ import com.ayybay.app.presentation.screen.HomeScreen
 import com.ayybay.app.presentation.screen.JobsScreen
 import com.ayybay.app.presentation.screen.LinkListScreen
 import com.ayybay.app.presentation.screen.LinkWebViewScreen
+import com.ayybay.app.presentation.screen.LoginScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
+import com.ayybay.app.presentation.screen.SignUpScreen
 import com.ayybay.app.presentation.screen.SurahListScreen
 import com.ayybay.app.presentation.screen.SurahWebViewScreen
 import com.ayybay.app.data.local.QuranSurahData
+import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 
 sealed class Screen(val route: String) {
+    object Login : Screen("login")
+    object SignUp : Screen("sign_up")
     object Home : Screen("home")
     object Finance : Screen("finance")
     object AddTransaction : Screen("add_transaction?transactionId={transactionId}") {
@@ -65,13 +76,38 @@ private data class BottomNavItem(
 
 @Composable
 fun AppNavigation(
+    authViewModel: AuthViewModel,
     transactionViewModel: TransactionViewModel,
     prayerViewModel: PrayerViewModel,
     linkViewModel: LinkViewModel
 ) {
+    val authUiState by authViewModel.uiState.collectAsState()
+
+    if (authUiState.isCheckingSession) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    LaunchedEffect(Unit) {
+        authViewModel.uiEffect.collect { effect ->
+            when (effect) {
+                is AuthUiEffect.NavigateToHome -> navController.navigate(Screen.Home.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                    launchSingleTop = true
+                }
+                is AuthUiEffect.NavigateToLogin -> navController.navigate(Screen.Login.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        }
+    }
 
     val bottomNavItems = listOf(
         BottomNavItem(Screen.Home.route, "Home", Icons.Default.Home),
@@ -113,12 +149,36 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = if (authUiState.isLoggedIn) Screen.Home.route else Screen.Login.route,
             modifier = Modifier.padding(innerPadding)
         ) {
+            composable(Screen.Login.route) {
+                val context = LocalContext.current
+                LoginScreen(
+                    isSigningIn = authUiState.isSigningIn,
+                    error = authUiState.error,
+                    onGoogleSignIn = { authViewModel.handleIntent(AuthUiIntent.SignInWithGoogle(context)) },
+                    onNavigateToSignUp = { navController.navigate(Screen.SignUp.route) },
+                    onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) }
+                )
+            }
+
+            composable(Screen.SignUp.route) {
+                val context = LocalContext.current
+                SignUpScreen(
+                    isSigningIn = authUiState.isSigningIn,
+                    error = authUiState.error,
+                    onGoogleSignUp = { authViewModel.handleIntent(AuthUiIntent.SignInWithGoogle(context)) },
+                    onNavigateToLogin = { navController.popBackStack() },
+                    onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) }
+                )
+            }
+
             composable(Screen.Home.route) {
                 HomeScreen(
                     uiState = transactionUiState,
+                    userName = authUiState.user?.displayName ?: "Guest",
+                    userEmail = authUiState.user?.email,
                     prayerTimes = prayerTimes,
                     onTogglePrayerNotification = { name, enabled ->
                         prayerViewModel.togglePrayerNotification(name, enabled)
@@ -151,7 +211,8 @@ fun AppNavigation(
                             launchSingleTop = true
                             restoreState = true
                         }
-                    }
+                    },
+                    onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
                 )
             }
 

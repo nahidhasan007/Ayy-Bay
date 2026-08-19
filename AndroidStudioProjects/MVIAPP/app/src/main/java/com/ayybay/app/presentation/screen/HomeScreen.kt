@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
@@ -48,6 +49,7 @@ import com.ayybay.app.ui.theme.ExpenseRedTint
 import com.ayybay.app.ui.theme.IncomeGreen
 import com.ayybay.app.ui.theme.IncomeGreenTint
 import com.ayybay.app.ui.theme.IslamicGoldLight
+import com.ayybay.app.ui.theme.IslamicGreen
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -57,13 +59,16 @@ import java.util.Locale
 fun HomeScreen(
     modifier: Modifier = Modifier,
     uiState: TransactionUiState,
+    userName: String = "Guest",
+    userEmail: String? = null,
     prayerTimes: List<PrayerTime> = emptyList(),
     onTogglePrayerNotification: (PrayerName, Boolean) -> Unit = { _, _ -> },
     onNavigatePrayerTimes: () -> Unit = {},
     onNavigateFinance: () -> Unit = {},
     onNavigateJobs: () -> Unit = {},
     onNavigateWebsites: () -> Unit = {},
-    onNavigateBooks: () -> Unit = {}
+    onNavigateBooks: () -> Unit = {},
+    onSignOut: () -> Unit = {}
 ) {
     Scaffold(modifier = modifier) { paddingValues ->
         LazyColumn(
@@ -73,7 +78,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            item { HomeHeader() }
+            item { HomeHeader(userName = userName, userEmail = userEmail, onSignOut = onSignOut) }
 
             item {
                 NextPrayerCard(
@@ -91,7 +96,11 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader() {
+private fun HomeHeader(
+    userName: String,
+    userEmail: String?,
+    onSignOut: () -> Unit
+) {
     val today = remember { Date() }
     val englishDateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()) }
     val englishWeekdayFormat = remember { SimpleDateFormat("EEEE", Locale.getDefault()) }
@@ -108,7 +117,7 @@ private fun HomeHeader() {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Nahid",
+                text = userName,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -145,6 +154,55 @@ private fun HomeHeader() {
             }
             Spacer(modifier = Modifier.width(4.dp))
             LanguageToggle()
+            Spacer(modifier = Modifier.width(4.dp))
+            AccountAvatarMenu(userName = userName, userEmail = userEmail, onSignOut = onSignOut)
+        }
+    }
+}
+
+@Composable
+private fun AccountAvatarMenu(
+    userName: String,
+    userEmail: String?,
+    onSignOut: () -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(IslamicGreen)
+                .clickable { expanded = true },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = userName.firstOrNull()?.uppercase() ?: "U",
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Text(text = userName, fontWeight = FontWeight.Bold)
+                if (userEmail != null) {
+                    Text(
+                        text = userEmail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text("Sign out") },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onSignOut()
+                }
+            )
         }
     }
 }

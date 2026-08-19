@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Jibon</string>
+
+    <!-- OAuth 2.0 Web Client ID (type "Web application") from Google Cloud Console,
+         registered against this app's package name (com.ayybay.app) and release/debug
+         SHA-1 signing certificates. Replace before running Google Sign-In. -->
+    <string name="google_web_client_id" translatable="false">REPLACE_WITH_YOUR_WEB_CLIENT_ID.apps.googleusercontent.com</string>
     <string name="links">Links</string>
     <string name="categories">Categories</string>
     <string name="add_link">Add Link</string>

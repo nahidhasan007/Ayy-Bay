@@ -2,15 +2,20 @@ package com.ayybay.app.di
 
 import android.content.Context
 import com.ayybay.app.AyyBayViewModel
+import com.ayybay.app.R
 import com.ayybay.app.data.PrayerTimeCalculator
 import com.ayybay.app.data.local.AppDatabase
+import com.ayybay.app.data.local.AuthPreferences
+import com.ayybay.app.data.repository.AuthRepositoryImpl
 import com.ayybay.app.data.repository.LinkRepositoryImpl
 import com.ayybay.app.data.repository.TransactionRepositoryImpl
 import com.ayybay.app.data.repository.PrayerTimeRepositoryImpl
+import com.ayybay.app.domain.repository.AuthRepository
 import com.ayybay.app.domain.repository.LinkRepository
 import com.ayybay.app.domain.repository.TransactionRepository
 import com.ayybay.app.domain.repository.PrayerTimeRepository
 import com.ayybay.app.domain.usecase.*
+import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
@@ -39,6 +44,15 @@ val appModule = module {
     }
     single<LinkRepository> { LinkRepositoryImpl(get()) }
 
+    // Auth
+    single { AuthPreferences(androidContext()) }
+    single<AuthRepository> {
+        AuthRepositoryImpl(
+            authPreferences = get(),
+            webClientId = androidContext().getString(R.string.google_web_client_id)
+        )
+    }
+
     // Use Cases - Transaction
     factory { GetAllTransactionsUseCase(get()) }
     factory { AddTransactionUseCase(get()) }
@@ -58,6 +72,11 @@ val appModule = module {
     factory { GetLinksByCategoryUseCase(get()) }
     factory { AddLinkUseCase(get()) }
     factory { DeleteLinkUseCase(get()) }
+
+    // Use Cases - Auth
+    factory { ObserveAuthUserUseCase(get()) }
+    factory { SignInWithGoogleUseCase(get()) }
+    factory { SignOutUseCase(get()) }
 
     // ViewModels
     viewModel {
@@ -93,6 +112,14 @@ val appModule = module {
             addLinkUseCase = get(),
             deleteLinkUseCase = get(),
             linkRepository = get()
+        )
+    }
+
+    viewModel {
+        AuthViewModel(
+            observeAuthUserUseCase = get(),
+            signInWithGoogleUseCase = get(),
+            signOutUseCase = get()
         )
     }
 }

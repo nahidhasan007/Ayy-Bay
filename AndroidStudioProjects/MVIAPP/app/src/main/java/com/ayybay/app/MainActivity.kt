@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.core.content.ContextCompat
 import com.ayybay.app.presentation.navigation.AppNavigation
+import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
@@ -23,6 +24,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
+    private val authViewModel: AuthViewModel by viewModel()
     private val transactionViewModel: TransactionViewModel by viewModel()
     private val prayerViewModel: PrayerViewModel by viewModel()
     private val linkViewModel: LinkViewModel by viewModel()
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
             MVIAPPTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AppNavigation(
+                        authViewModel = authViewModel,
                         transactionViewModel = transactionViewModel,
                         prayerViewModel = prayerViewModel,
                         linkViewModel = linkViewModel

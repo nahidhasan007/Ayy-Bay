@@ -92,4 +92,12 @@ dependencies {
 
     // Material Components (for BottomNavigationView, MaterialCardView, etc.)
     implementation(libs.material)
+
+    // Auth - Google Sign-In via Credential Manager
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
+    // DataStore - persists the signed-in session
+    implementation(libs.androidx.datastore.preferences)
 }
