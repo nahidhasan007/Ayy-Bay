@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.*
 import androidx.navigation.compose.*
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.AuthUiEffect
 import com.ayybay.app.presentation.mvi.AuthUiIntent
 import com.ayybay.app.presentation.mvi.LinkUiIntent
@@ -110,11 +111,11 @@ fun AppNavigation(
     }
 
     val bottomNavItems = listOf(
-        BottomNavItem(Screen.Home.route, "Home", Icons.Default.Home),
-        BottomNavItem(Screen.Finance.route, "Finance", Icons.Default.AccountBalanceWallet),
-        BottomNavItem(Screen.Jobs.route, "Jobs", Icons.Default.Work),
-        BottomNavItem(Screen.DailyLinks.route, "Websites", Icons.Default.Public),
-        BottomNavItem(Screen.Books.route, "Books", Icons.AutoMirrored.Filled.MenuBook)
+        BottomNavItem(Screen.Home.route, tr("Home", "হোম"), Icons.Default.Home),
+        BottomNavItem(Screen.Finance.route, tr("Finance", "আর্থিক"), Icons.Default.AccountBalanceWallet),
+        BottomNavItem(Screen.Jobs.route, tr("Jobs", "চাকরি"), Icons.Default.Work),
+        BottomNavItem(Screen.DailyLinks.route, tr("Websites", "ওয়েবসাইট"), Icons.Default.Public),
+        BottomNavItem(Screen.Books.route, tr("Books", "বই"), Icons.AutoMirrored.Filled.MenuBook)
     )
 
     val showBottomBar = bottomNavItems.any { it.route == currentRoute }
@@ -177,7 +178,7 @@ fun AppNavigation(
             composable(Screen.Home.route) {
                 HomeScreen(
                     uiState = transactionUiState,
-                    userName = authUiState.user?.displayName ?: "Guest",
+                    userName = authUiState.user?.displayName ?: tr("Guest", "অতিথি"),
                     userEmail = authUiState.user?.email,
                     prayerTimes = prayerTimes,
                     onTogglePrayerNotification = { name, enabled ->
@@ -297,7 +298,7 @@ fun AppNavigation(
                 val surah = QuranSurahData.surahs().find { it.number == surahNumber } ?: return@composable
                 SurahWebViewScreen(
                     url = surah.url,
-                    title = "${surah.number}. ${surah.name}",
+                    title = "${surah.number}. ${tr(surah.name, surah.nameBn)}",
                     onBack = { navController.popBackStack() }
                 )
             }

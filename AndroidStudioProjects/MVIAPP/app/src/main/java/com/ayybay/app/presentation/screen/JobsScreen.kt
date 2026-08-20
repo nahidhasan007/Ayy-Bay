@@ -32,18 +32,19 @@ import com.ayybay.app.data.local.JobSampleData
 import com.ayybay.app.domain.model.GovtJob
 import com.ayybay.app.domain.model.JobTag
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.ui.theme.ExpenseRed
 import com.ayybay.app.ui.theme.IncomeGreenTint
 
-private data class JobFilter(val label: String, val tag: JobTag?)
+private data class JobFilter(val labelEn: String, val labelBn: String, val tag: JobTag?)
 
 private val jobFilters = listOf(
-    JobFilter("All", null),
-    JobFilter("New", JobTag.NEW),
-    JobFilter("Deadline Soon", JobTag.DEADLINE_SOON),
-    JobFilter("BCS", JobTag.BCS),
-    JobFilter("Bank", JobTag.BANK),
-    JobFilter("Defense", JobTag.DEFENSE)
+    JobFilter("All", "সকল", null),
+    JobFilter("New", "নতুন", JobTag.NEW),
+    JobFilter("Deadline Soon", "শেষ তারিখ কাছাকাছি", JobTag.DEADLINE_SOON),
+    JobFilter("BCS", "বিসিএস", JobTag.BCS),
+    JobFilter("Bank", "ব্যাংক", JobTag.BANK),
+    JobFilter("Defense", "প্রতিরক্ষা", JobTag.DEFENSE)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,19 +73,16 @@ fun JobsScreen() {
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(text = "Govt Jobs", fontWeight = FontWeight.Bold)
-                        Text(text = "সরকারি চাকরি", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    Text(text = tr("Govt Jobs", "সরকারি চাকরি"), fontWeight = FontWeight.Bold)
                 },
                 actions = {
                     IconButton(onClick = { searchActive = !searchActive }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
+                        Icon(Icons.Default.Search, contentDescription = tr("Search", "খুঁজুন"))
                     }
                     IconButton(onClick = { bookmarkedOnly = !bookmarkedOnly }) {
                         Icon(
                             imageVector = if (bookmarkedOnly) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = "Bookmarked jobs",
+                            contentDescription = tr("Bookmarked jobs", "বুকমার্ক করা চাকরি"),
                             tint = if (bookmarkedOnly) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -106,7 +104,7 @@ fun JobsScreen() {
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Search jobs or organizations…") },
+                        placeholder = { Text(tr("Search jobs or organizations…", "চাকরি বা প্রতিষ্ঠান খুঁজুন…")) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         singleLine = true,
                         shape = RoundedCornerShape(50)
@@ -126,7 +124,7 @@ fun JobsScreen() {
                         FilterChip(
                             selected = selectedFilter == filter,
                             onClick = { selectedFilter = filter },
-                            label = { Text(filter.label) }
+                            label = { Text(tr(filter.labelEn, filter.labelBn)) }
                         )
                     }
                 }
@@ -135,7 +133,7 @@ fun JobsScreen() {
             if (filteredJobs.isEmpty()) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text(text = "No jobs match your filters", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = tr("No jobs match your filters", "আপনার ফিল্টারের সাথে মিলে এমন কোনো চাকরি নেই"), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             } else {
@@ -177,7 +175,7 @@ private fun FeaturedJobCard(job: GovtJob, onViewCircular: () -> Unit) {
                 }
                 if (job.isNew) {
                     Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary) {
-                        Text(text = "NEW", color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+                        Text(text = tr("NEW", "নতুন"), color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.Bold, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
                     }
                 }
             }
@@ -185,9 +183,9 @@ private fun FeaturedJobCard(job: GovtJob, onViewCircular: () -> Unit) {
             Spacer(modifier = Modifier.height(14.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                JobMetaColumn(icon = Icons.Default.CalendarToday, label = "Published", value = job.publishedDate)
-                JobMetaColumn(icon = Icons.Default.Groups, label = "Vacancies", value = job.vacancies.toString())
-                JobMetaColumn(icon = Icons.Default.Event, label = "Deadline", value = job.deadline, valueColor = ExpenseRed)
+                JobMetaColumn(icon = Icons.Default.CalendarToday, label = tr("Published", "প্রকাশিত"), value = job.publishedDate)
+                JobMetaColumn(icon = Icons.Default.Groups, label = tr("Vacancies", "শূন্যপদ"), value = job.vacancies.toString())
+                JobMetaColumn(icon = Icons.Default.Event, label = tr("Deadline", "শেষ তারিখ"), value = job.deadline, valueColor = ExpenseRed)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -198,7 +196,7 @@ private fun FeaturedJobCard(job: GovtJob, onViewCircular: () -> Unit) {
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("View Circular", fontWeight = FontWeight.Bold)
+                Text(tr("View Circular", "সার্কুলার দেখুন"), fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
             }
@@ -240,17 +238,17 @@ private fun JobCard(
                     Text(text = job.title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(6.dp))
                     Row {
-                        Text(text = "Published: ${job.publishedDate}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = "${tr("Published", "প্রকাশিত")}: ${job.publishedDate}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Row {
-                        Text(text = "Deadline: ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = "${tr("Deadline", "শেষ তারিখ")}: ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Text(text = job.deadline, style = MaterialTheme.typography.labelSmall, color = ExpenseRed, fontWeight = FontWeight.Bold)
                     }
                 }
                 IconButton(onClick = onToggleBookmark, modifier = Modifier.size(28.dp)) {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = "Bookmark",
+                        contentDescription = tr("Bookmark", "বুকমার্ক"),
                         tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -262,7 +260,7 @@ private fun JobCard(
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Open Website")
+                Text(tr("Open Website", "ওয়েবসাইট খুলুন"))
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(14.dp))
             }

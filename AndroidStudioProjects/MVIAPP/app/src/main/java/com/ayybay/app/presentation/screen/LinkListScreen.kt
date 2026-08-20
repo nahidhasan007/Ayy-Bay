@@ -17,6 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.domain.model.DailyLink
 import com.ayybay.app.domain.model.LinkCategory
+import com.ayybay.app.presentation.language.label
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.LinkUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +41,7 @@ fun LinkListScreen(
                             Text(text = "${it.icon}  ")
                         }
                         Text(
-                            text = linkCategory?.displayName ?: category,
+                            text = linkCategory?.label() ?: category,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -48,7 +50,7 @@ fun LinkListScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = tr("Back", "পেছনে"),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -72,13 +74,13 @@ fun LinkListScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "No links available",
+                        text = tr("No links available", "কোনো লিংক পাওয়া যায়নি"),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Coming soon!",
+                        text = tr("Coming soon!", "শীঘ্রই আসছে!"),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -94,7 +96,7 @@ fun LinkListScreen(
             ) {
                 item {
                     Text(
-                        text = "${uiState.links.size} links",
+                        text = tr("${uiState.links.size} links", "${uiState.links.size}টি লিংক"),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -150,11 +152,11 @@ private fun LinkItemCard(
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = accentColor)
             ) {
-                Text("Open Website")
+                Text(tr("Open Website", "ওয়েবসাইট খুলুন"))
                 Spacer(Modifier.width(6.dp))
                 Icon(
                     imageVector = Icons.Default.OpenInBrowser,
-                    contentDescription = "Open",
+                    contentDescription = tr("Open", "খুলুন"),
                     modifier = Modifier.size(16.dp)
                 )
             }

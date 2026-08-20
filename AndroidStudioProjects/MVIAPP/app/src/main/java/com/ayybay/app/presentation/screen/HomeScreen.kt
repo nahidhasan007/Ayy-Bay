@@ -29,12 +29,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.model.PrayerTime
 import com.ayybay.app.domain.model.Transaction
 import com.ayybay.app.domain.model.TransactionType
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.language.AppLanguage
+import com.ayybay.app.presentation.language.LocalAppLanguage
+import com.ayybay.app.presentation.language.label
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.TransactionUiState
 import com.ayybay.app.presentation.util.banglaWeekday
 import com.ayybay.app.presentation.util.formatBanglaDate
@@ -102,6 +105,7 @@ private fun HomeHeader(
     onSignOut: () -> Unit
 ) {
     val today = remember { Date() }
+    val language = LocalAppLanguage.current
     val englishDateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()) }
     val englishWeekdayFormat = remember { SimpleDateFormat("EEEE", Locale.getDefault()) }
 
@@ -112,7 +116,7 @@ private fun HomeHeader(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Assalamu Alaikum",
+                text = tr("Assalamu Alaikum", "আসসালামু আলাইকুম"),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -123,12 +127,12 @@ private fun HomeHeader(
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "${formatBanglaDate(today)} | ${englishDateFormat.format(today)}",
+                text = if (language == AppLanguage.EN) englishDateFormat.format(today) else formatBanglaDate(today),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "${banglaWeekday(today)} | ${englishWeekdayFormat.format(today)}",
+                text = if (language == AppLanguage.EN) englishWeekdayFormat.format(today) else banglaWeekday(today),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -139,7 +143,7 @@ private fun HomeHeader(
                 IconButton(onClick = { }) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
+                        contentDescription = tr("Notifications", "নোটিফিকেশন"),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -196,7 +200,7 @@ private fun AccountAvatarMenu(
             }
             HorizontalDivider()
             DropdownMenuItem(
-                text = { Text("Sign out") },
+                text = { Text(tr("Sign out", "সাইন আউট")) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
                 onClick = {
                     expanded = false
@@ -235,12 +239,12 @@ private fun NextPrayerCard(
             ) {
                 Column {
                     Text(
-                        text = "Next Prayer",
+                        text = tr("Next Prayer", "পরবর্তী নামাজ"),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.8f)
                     )
                     Text(
-                        text = nextPrayer?.first?.prayerName?.displayName ?: "-",
+                        text = nextPrayer?.first?.prayerName?.label() ?: "-",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = IslamicGoldLight
@@ -248,7 +252,7 @@ private fun NextPrayerCard(
                 }
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = "Play Adhan",
+                    contentDescription = tr("Play Adhan", "আজান বাজান"),
                     tint = Color.White,
                     modifier = Modifier.size(26.dp)
                 )
@@ -272,7 +276,7 @@ private fun NextPrayerCard(
                 )
             }
             Text(
-                text = "remaining",
+                text = tr("remaining", "বাকি আছে"),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.7f)
             )
@@ -293,14 +297,14 @@ private fun NextPrayerCard(
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Text(
-                        text = "Dhaka, Bangladesh",
+                        text = tr("Dhaka, Bangladesh", "ঢাকা, বাংলাদেশ"),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Adhan Notifications",
+                        text = tr("Adhan Notifications", "আজানের নোটিফিকেশন"),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.85f)
                     )
@@ -336,7 +340,7 @@ private fun NextPrayerCard(
                             val isNext = prayer.prayerName == nextPrayer?.first?.prayerName
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = prayer.prayerName.displayName,
+                                    text = prayer.prayerName.label(),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal,
                                     color = if (isNext) IslamicGoldLight else Color.White.copy(alpha = 0.75f)
@@ -373,7 +377,7 @@ private fun QuickAccessSection(
 ) {
     Column {
         Text(
-            text = "দ্রুত ব্যবহার (Quick Access)",
+            text = tr("Quick Access", "দ্রুত ব্যবহার"),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -414,23 +418,15 @@ private fun QuickAccessTile(item: QuickAccessItem, modifier: Modifier = Modifier
                 .background(item.color.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = item.icon, contentDescription = item.labelEn, tint = item.color, modifier = Modifier.size(22.dp))
+            Icon(imageVector = item.icon, contentDescription = tr(item.labelEn, item.labelBn), tint = item.color, modifier = Modifier.size(22.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = item.labelEn,
+            text = tr(item.labelEn, item.labelBn),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
             maxLines = 2
-        )
-        Text(
-            text = item.labelBn,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            fontSize = 10.sp
         )
     }
 }
@@ -451,12 +447,12 @@ private fun TodaysOverviewSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "আজকের সারাংশ (Today's Overview)",
+                text = tr("Today's Overview", "আজকের সারাংশ"),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "View All  >",
+                text = tr("View All  >", "সব দেখুন  >"),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
@@ -469,7 +465,8 @@ private fun TodaysOverviewSection(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             StatTile(
-                titleBn = "আয় (Income)",
+                titleEn = "Income",
+                titleBn = "আয়",
                 amount = income,
                 trailingIcon = Icons.Default.ArrowUpward,
                 icon = Icons.Default.AccountBalanceWallet,
@@ -478,7 +475,8 @@ private fun TodaysOverviewSection(
                 modifier = Modifier.weight(1f)
             )
             StatTile(
-                titleBn = "খরচ (Expense)",
+                titleEn = "Expense",
+                titleBn = "খরচ",
                 amount = expense,
                 trailingIcon = Icons.Default.ArrowDownward,
                 icon = Icons.Default.AccountBalanceWallet,
@@ -487,7 +485,8 @@ private fun TodaysOverviewSection(
                 modifier = Modifier.weight(1f)
             )
             StatTile(
-                titleBn = "ব্যালেন্স (Balance)",
+                titleEn = "Balance",
+                titleBn = "ব্যালেন্স",
                 amount = balance,
                 trailingIcon = Icons.Default.Star,
                 icon = Icons.Default.AccountBalanceWallet,
@@ -501,6 +500,7 @@ private fun TodaysOverviewSection(
 
 @Composable
 private fun StatTile(
+    titleEn: String,
     titleBn: String,
     amount: Double,
     trailingIcon: ImageVector,
@@ -520,7 +520,7 @@ private fun StatTile(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = titleBn,
+                text = tr(titleEn, titleBn),
                 style = MaterialTheme.typography.labelSmall,
                 color = color,
                 maxLines = 1
@@ -541,7 +541,7 @@ private fun StatTile(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "এই মাসে",
+                text = tr("This month", "এই মাসে"),
                 style = MaterialTheme.typography.labelSmall,
                 color = color.copy(alpha = 0.7f)
             )

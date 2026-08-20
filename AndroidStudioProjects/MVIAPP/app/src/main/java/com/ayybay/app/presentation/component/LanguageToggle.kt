@@ -10,23 +10,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.collectAsState
+import com.ayybay.app.presentation.language.AppLanguage
+import com.ayybay.app.presentation.viewmodel.LanguageViewModel
+import org.koin.androidx.compose.koinViewModel
 
 /**
- * Bangla | EN pill toggle shown on every top-level screen in the mockup.
- * Visual only for now: it flips the highlighted side but does not translate any
- * screen text yet (full bilingual support is a separate, larger effort).
+ * Bangla | EN pill toggle shown on every top-level screen. Switches the app-wide
+ * [AppLanguage] via [LanguageViewModel]; every screen reading [com.ayybay.app.presentation.language.LocalAppLanguage]
+ * (through [com.ayybay.app.presentation.language.tr]) updates immediately.
  */
 @Composable
-fun LanguageToggle(modifier: Modifier = Modifier) {
-    var isBangla by remember { mutableStateOf(true) }
+fun LanguageToggle(
+    modifier: Modifier = Modifier,
+    languageViewModel: LanguageViewModel = koinViewModel()
+) {
+    val language by languageViewModel.language.collectAsState()
 
     Row(
         modifier = modifier
@@ -36,8 +40,8 @@ fun LanguageToggle(modifier: Modifier = Modifier) {
     ) {
         LanguageOption(
             label = "বাংলা",
-            selected = isBangla,
-            onClick = { isBangla = true }
+            selected = language == AppLanguage.BN,
+            onClick = { languageViewModel.setLanguage(AppLanguage.BN) }
         )
         Text(
             text = "|",
@@ -46,8 +50,8 @@ fun LanguageToggle(modifier: Modifier = Modifier) {
         )
         LanguageOption(
             label = "EN",
-            selected = !isBangla,
-            onClick = { isBangla = false }
+            selected = language == AppLanguage.EN,
+            onClick = { languageViewModel.setLanguage(AppLanguage.EN) }
         )
     }
 }

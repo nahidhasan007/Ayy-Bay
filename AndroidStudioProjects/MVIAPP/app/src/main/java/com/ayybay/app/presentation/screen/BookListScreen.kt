@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.data.local.BookSampleData
+import com.ayybay.app.presentation.language.tr
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,11 +36,11 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         category?.let { Text(text = "${it.icon}  ") }
-                        Text(text = category?.name ?: "Books", fontWeight = FontWeight.Bold)
+                        Text(text = category?.let { tr(it.name, it.nameBn) } ?: tr("Books", "বই"), fontWeight = FontWeight.Bold)
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে")) }
                 }
             )
         },
@@ -47,10 +48,12 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
     ) { paddingValues ->
         if (category == null) {
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                Text("Category not found")
+                Text(tr("Category not found", "ক্যাটাগরি পাওয়া যায়নি"))
             }
             return@Scaffold
         }
+
+        val fullTextComingSoon = tr("coming soon", "শীঘ্রই আসছে")
 
         LazyColumn(
             modifier = Modifier
@@ -61,12 +64,13 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
         ) {
             item {
                 Text(
-                    text = "${category.books.size} books",
+                    text = tr("${category.books.size} books", "${category.books.size}টি বই"),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             items(category.books, key = { it.id }) { book ->
+                val localizedTitle = tr(book.title, book.titleBn)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -74,7 +78,7 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
                             if (religionId == "islam" && book.id == 1L) {
                                 onOpenQuran()
                             } else {
-                                scope.launch { snackbarHostState.showSnackbar("Full text for \"${book.title}\" coming soon") }
+                                scope.launch { snackbarHostState.showSnackbar("\"$localizedTitle\" $fullTextComingSoon") }
                             }
                         },
                     shape = RoundedCornerShape(12.dp),
@@ -95,7 +99,7 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
                             Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text(text = book.title, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
+                        Text(text = localizedTitle, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
                         Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }

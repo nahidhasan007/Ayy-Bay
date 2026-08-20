@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.ayybay.app.data.local.BookSampleData
 import com.ayybay.app.domain.model.ReligionCategory
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.language.tr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,10 +30,7 @@ fun BooksScreen(onCategoryClick: (String) -> Unit) {
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(text = "Religious Books", fontWeight = FontWeight.Bold)
-                        Text(text = "ধর্মীয় গ্রন্থ", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    Text(text = tr("Religious Books", "ধর্মীয় গ্রন্থ"), fontWeight = FontWeight.Bold)
                 },
                 actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
             )
@@ -78,8 +76,8 @@ private fun ReligionCard(category: ReligionCategory, onClick: () -> Unit) {
             }
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = category.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(text = category.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = tr(category.name, category.nameBn), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(text = tr(category.subtitle, category.subtitleBn), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(modifier = Modifier.width(8.dp))
             Button(
@@ -87,7 +85,7 @@ private fun ReligionCard(category: ReligionCategory, onClick: () -> Unit) {
                 shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(containerColor = color)
             ) {
-                Text("Read")
+                Text(tr("Read", "পড়ুন"))
             }
         }
     }

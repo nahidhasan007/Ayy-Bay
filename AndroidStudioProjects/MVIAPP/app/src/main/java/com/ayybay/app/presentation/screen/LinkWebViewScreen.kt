@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.LinkUiIntent
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 
@@ -38,7 +39,7 @@ fun LinkWebViewScreen(
     // Ensure we are displaying the link that matches the current linkId
     val currentLink = if (link?.id == linkId) link else null
     val url = currentLink?.url ?: ""
-    val title = currentLink?.title ?: "Loading…"
+    val title = currentLink?.title ?: tr("Loading…", "লোড হচ্ছে…")
 
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
     var isPageLoading by remember { mutableStateOf(true) }
@@ -60,7 +61,7 @@ fun LinkWebViewScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = tr("Back", "পেছনে"),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -70,7 +71,7 @@ fun LinkWebViewScreen(
                         IconButton(onClick = { webViewRef?.reload() }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh",
+                                contentDescription = tr("Refresh", "রিফ্রেশ"),
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
@@ -81,7 +82,7 @@ fun LinkWebViewScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.OpenInBrowser,
-                                contentDescription = "Open in browser",
+                                contentDescription = tr("Open in browser", "ব্রাউজারে খুলুন"),
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }

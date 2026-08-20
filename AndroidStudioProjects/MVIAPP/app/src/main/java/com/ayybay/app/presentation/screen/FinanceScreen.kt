@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.ayybay.app.domain.model.Transaction
 import com.ayybay.app.presentation.component.DonutChart
 import com.ayybay.app.presentation.component.TransactionCard
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.TransactionUiState
 import com.ayybay.app.presentation.util.ExpenseCategory
 import com.ayybay.app.presentation.util.expenseBucketOf
@@ -72,22 +73,22 @@ fun FinanceScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(text = "My Finance", fontWeight = FontWeight.Bold)
-                        Text(text = "আমার হিসাব", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = tr("My Finance", "আমার হিসাব"), fontWeight = FontWeight.Bold)
+                        Text(text = tr("Track your income & expenses", "আপনার আয়-ব্যয়ের হিসাব রাখুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = "Menu") }
+                    IconButton(onClick = {}) { Icon(Icons.Default.Menu, contentDescription = tr("Menu", "মেনু")) }
                 },
                 actions = {
-                    IconButton(onClick = {}) { Icon(Icons.Default.FilterList, contentDescription = "Filter") }
-                    IconButton(onClick = onAddTransaction) { Icon(Icons.Default.Add, contentDescription = "Add Transaction") }
+                    IconButton(onClick = {}) { Icon(Icons.Default.FilterList, contentDescription = tr("Filter", "ফিল্টার")) }
+                    IconButton(onClick = onAddTransaction) { Icon(Icons.Default.Add, contentDescription = tr("Add Transaction", "লেনদেন যোগ করুন")) }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddTransaction, containerColor = MaterialTheme.colorScheme.primary) {
-                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+                Icon(Icons.Default.Add, contentDescription = tr("Add Transaction", "লেনদেন যোগ করুন"))
             }
         }
     ) { paddingValues ->
@@ -120,8 +121,9 @@ fun FinanceScreen(
             }
 
             item {
+                val recentTransactionsLabel = tr("Recent Transactions", "সাম্প্রতিক লেনদেন")
                 Text(
-                    text = if (categoryFilter == null) "Recent Transactions" else "Recent Transactions · ${categoryFilter!!.label}",
+                    text = if (categoryFilter == null) recentTransactionsLabel else "$recentTransactionsLabel · ${categoryFilter!!.label}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -131,7 +133,7 @@ fun FinanceScreen(
                 item {
                     Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "No transactions for this month yet",
+                            text = tr("No transactions for this month yet", "এই মাসে এখনো কোনো লেনদেন নেই"),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -199,7 +201,7 @@ private fun TotalBalanceCard(income: Double, expense: Double, savings: Double) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = "Total Balance", color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f))
+                Text(text = tr("Total Balance", "মোট ব্যালেন্স"), color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f))
                 Text(
                     text = formatTaka(savings),
                     style = MaterialTheme.typography.headlineMedium,
@@ -208,9 +210,9 @@ private fun TotalBalanceCard(income: Double, expense: Double, savings: Double) {
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    BalanceStat(label = "Income", amount = income)
-                    BalanceStat(label = "Expense", amount = expense)
-                    BalanceStat(label = "Savings", amount = savings)
+                    BalanceStat(label = tr("Income", "আয়"), amount = income)
+                    BalanceStat(label = tr("Expense", "ব্যয়"), amount = expense)
+                    BalanceStat(label = tr("Savings", "সঞ্চয়"), amount = savings)
                 }
             }
             Box(
@@ -238,7 +240,7 @@ private fun BalanceStat(label: String, amount: Double) {
 private fun MonthlySpendingCard(expenseByCategory: Map<ExpenseCategory, Double>, totalExpense: Double) {
     Card(shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Monthly Spending", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = tr("Monthly Spending", "মাসিক খরচ"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(modifier = Modifier.size(120.dp), contentAlignment = Alignment.Center) {
@@ -249,7 +251,7 @@ private fun MonthlySpendingCard(expenseByCategory: Map<ExpenseCategory, Double>,
                     DonutChart(slices = slices, modifier = Modifier.fillMaxSize())
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(text = formatTaka(totalExpense), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                        Text(text = "Total", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = tr("Total", "মোট"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
@@ -283,7 +285,7 @@ private fun MonthlySpendingCard(expenseByCategory: Map<ExpenseCategory, Double>,
 @Composable
 private fun ExpenseCategoriesGrid(selected: ExpenseCategory?, onSelect: (ExpenseCategory) -> Unit) {
     Column {
-        Text(text = "Expense Categories", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(text = tr("Expense Categories", "খরচের ধরন"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         val rows = ExpenseCategory.entries.chunked(4)
         rows.forEach { row ->

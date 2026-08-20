@@ -6,6 +6,7 @@ import com.ayybay.app.R
 import com.ayybay.app.data.PrayerTimeCalculator
 import com.ayybay.app.data.local.AppDatabase
 import com.ayybay.app.data.local.AuthPreferences
+import com.ayybay.app.data.local.LanguagePreferences
 import com.ayybay.app.data.repository.AuthRepositoryImpl
 import com.ayybay.app.data.repository.LinkRepositoryImpl
 import com.ayybay.app.data.repository.TransactionRepositoryImpl
@@ -16,6 +17,7 @@ import com.ayybay.app.domain.repository.TransactionRepository
 import com.ayybay.app.domain.repository.PrayerTimeRepository
 import com.ayybay.app.domain.usecase.*
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
+import com.ayybay.app.presentation.viewmodel.LanguageViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
@@ -52,6 +54,9 @@ val appModule = module {
             webClientId = androidContext().getString(R.string.google_web_client_id)
         )
     }
+
+    // Language
+    single { LanguagePreferences(androidContext()) }
 
     // Use Cases - Transaction
     factory { GetAllTransactionsUseCase(get()) }
@@ -122,6 +127,8 @@ val appModule = module {
             signOutUseCase = get()
         )
     }
+
+    viewModel { LanguageViewModel(languagePreferences = get()) }
 }
 
 fun provideAppDatabase(context: Context): AppDatabase {

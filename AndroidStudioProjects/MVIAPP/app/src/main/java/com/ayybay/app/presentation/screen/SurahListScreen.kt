@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.data.local.QuranSurahData
 import com.ayybay.app.data.local.Surah
+import com.ayybay.app.presentation.language.tr
 
 private val IslamicGreen = androidx.compose.ui.graphics.Color(0xFF1B6B3A)
 
@@ -35,14 +36,14 @@ fun SurahListScreen(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "📖  ")
-                        Text(text = "Al-Quran", fontWeight = FontWeight.Bold)
+                        Text(text = tr("Al-Quran", "আল-কুরআন"), fontWeight = FontWeight.Bold)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = tr("Back", "পেছনে"),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -63,7 +64,7 @@ fun SurahListScreen(
         ) {
             item {
                 Text(
-                    text = "${surahs.size} Surahs",
+                    text = tr("${surahs.size} Surahs", "${surahs.size}টি সূরা"),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -104,7 +105,7 @@ private fun SurahRow(surah: Surah, onClick: () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.width(14.dp))
-            Text(text = surah.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
+            Text(text = tr(surah.name, surah.nameBn), modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

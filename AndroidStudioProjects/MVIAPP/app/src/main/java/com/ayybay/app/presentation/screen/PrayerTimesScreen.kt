@@ -29,6 +29,12 @@ import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.model.PrayerSettings
 import com.ayybay.app.domain.model.PrayerTime
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.language.AppLanguage
+import com.ayybay.app.presentation.language.LocalAppLanguage
+import com.ayybay.app.presentation.language.label
+import com.ayybay.app.presentation.language.tr
+import com.ayybay.app.presentation.util.banglaWeekday
+import com.ayybay.app.presentation.util.formatBanglaDate
 import com.ayybay.app.presentation.util.formatCountdown
 import com.ayybay.app.presentation.util.nextPrayerOf
 import com.ayybay.app.presentation.util.rememberTickingNow
@@ -44,14 +50,6 @@ private fun prayerIcon(name: PrayerName): String = when (name) {
     PrayerName.ASR -> "☀️"
     PrayerName.MAGHRIB -> "🌅"
     PrayerName.ISHA -> "🌠"
-}
-
-private fun prayerBnName(name: PrayerName): String = when (name) {
-    PrayerName.FAJR -> "ফজর"
-    PrayerName.DHUHR -> "যোহর"
-    PrayerName.ASR -> "আসর"
-    PrayerName.MAGHRIB -> "মাগরিব"
-    PrayerName.ISHA -> "ইশা"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,11 +69,11 @@ fun PrayerTimesScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "🕌  Prayer Times", fontWeight = FontWeight.Bold)
+                    Text(text = "🕌  " + tr("Prayer Times", "নামাজের সময়"), fontWeight = FontWeight.Bold)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
                 actions = {
@@ -93,9 +91,10 @@ fun PrayerTimesScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
+                val locationComingSoon = tr("Location settings coming soon", "লোকেশন সেটিংস শীঘ্রই আসছে")
                 LocationRow(
                     onClick = {
-                        scope.launch { snackbarHostState.showSnackbar("Location settings coming soon") }
+                        scope.launch { snackbarHostState.showSnackbar(locationComingSoon) }
                     }
                 )
             }
@@ -118,7 +117,7 @@ fun PrayerTimesScreen(
 
             item {
                 Text(
-                    text = "Adhan Settings",
+                    text = tr("Adhan Settings", "আজান সেটিংস"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -127,8 +126,8 @@ fun PrayerTimesScreen(
             item {
                 SettingsRow(
                     icon = Icons.Default.Notifications,
-                    title = "Enable Adhan (All Prayers)",
-                    subtitle = "সকল সময়ে আযান চালু করুন",
+                    title = tr("Enable Adhan (All Prayers)", "সকল নামাজে আজান চালু করুন"),
+                    subtitle = tr("Plays the Adhan for every prayer time", "প্রতিটি নামাজের সময় আজান বাজবে"),
                     trailing = {
                         Switch(
                             checked = prayerTimes.isNotEmpty() && prayerTimes.all { it.isEnabled },
@@ -140,7 +139,7 @@ fun PrayerTimesScreen(
 
             item {
                 Text(
-                    text = "Prayer Settings",
+                    text = tr("Prayer Settings", "নামাজের সেটিংস"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -151,7 +150,7 @@ fun PrayerTimesScreen(
                 Box {
                     SettingsRow(
                         icon = Icons.Default.Public,
-                        title = "Calculation Method",
+                        title = tr("Calculation Method", "হিসাব পদ্ধতি"),
                         subtitle = prayerSettings.calculationMethod.methodName,
                         onClick = { methodMenuExpanded = true },
                         trailing = { Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -175,16 +174,16 @@ fun PrayerTimesScreen(
                 Box {
                     SettingsRow(
                         icon = Icons.AutoMirrored.Filled.MenuBook,
-                        title = "Madhab",
-                        subtitle = if (prayerSettings.madhab == Madhab.HANAFI) "Hanafi (হানাফি)" else "Shafi'i (শাফি'ই)",
+                        title = tr("Madhab", "মাযহাব"),
+                        subtitle = if (prayerSettings.madhab == Madhab.HANAFI) tr("Hanafi", "হানাফি") else tr("Shafi'i", "শাফি'ই"),
                         onClick = { madhabMenuExpanded = true },
                         trailing = { Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                     )
                     DropdownMenu(expanded = madhabMenuExpanded, onDismissRequest = { madhabMenuExpanded = false }) {
-                        DropdownMenuItem(text = { Text("Hanafi") }, onClick = {
+                        DropdownMenuItem(text = { Text(tr("Hanafi", "হানাফি")) }, onClick = {
                             onUpdateSettings(prayerSettings.copy(madhab = Madhab.HANAFI)); madhabMenuExpanded = false
                         })
-                        DropdownMenuItem(text = { Text("Shafi'i") }, onClick = {
+                        DropdownMenuItem(text = { Text(tr("Shafi'i", "শাফি'ই")) }, onClick = {
                             onUpdateSettings(prayerSettings.copy(madhab = Madhab.SHAFI)); madhabMenuExpanded = false
                         })
                     }
@@ -192,21 +191,23 @@ fun PrayerTimesScreen(
             }
 
             item {
+                val locationPickerComingSoon = tr("Location picker coming soon", "লোকেশন নির্বাচন শীঘ্রই আসছে")
                 SettingsRow(
                     icon = Icons.Default.LocationOn,
-                    title = "Location",
-                    subtitle = "Dhaka, Bangladesh",
-                    onClick = { scope.launch { snackbarHostState.showSnackbar("Location picker coming soon") } },
+                    title = tr("Location", "অবস্থান"),
+                    subtitle = tr("Dhaka, Bangladesh", "ঢাকা, বাংলাদেশ"),
+                    onClick = { scope.launch { snackbarHostState.showSnackbar(locationPickerComingSoon) } },
                     trailing = { Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                 )
             }
 
             item {
+                val notificationSettingsComingSoon = tr("Notification settings coming soon", "নোটিফিকেশন সেটিংস শীঘ্রই আসছে")
                 SettingsRow(
                     icon = Icons.Default.Notifications,
-                    title = "Notification Settings",
-                    subtitle = "Manage prayer time notifications",
-                    onClick = { scope.launch { snackbarHostState.showSnackbar("Notification settings coming soon") } },
+                    title = tr("Notification Settings", "নোটিফিকেশন সেটিংস"),
+                    subtitle = tr("Manage prayer time notifications", "নামাজের নোটিফিকেশন পরিচালনা করুন"),
+                    onClick = { scope.launch { snackbarHostState.showSnackbar(notificationSettingsComingSoon) } },
                     trailing = { Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                 )
             }
@@ -233,7 +234,7 @@ private fun LocationRow(onClick: () -> Unit) {
         ) {
             Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "Dhaka, Bangladesh", fontWeight = FontWeight.Medium)
+            Text(text = tr("Dhaka, Bangladesh", "ঢাকা, বাংলাদেশ"), fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.width(6.dp))
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -248,6 +249,7 @@ private fun PrayerCountdownCard(
     onPlayAdhan: () -> Unit
 ) {
     val now by rememberTickingNow()
+    val language = LocalAppLanguage.current
     val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy | EEEE", Locale.getDefault()) }
     val clockFormat = remember { SimpleDateFormat("hh:mm:ss a", Locale.getDefault()) }
     val nextPrayer = remember(prayerTimes, now) { nextPrayerOf(prayerTimes, now) }
@@ -264,20 +266,20 @@ private fun PrayerCountdownCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = dateFormat.format(now),
+                    text = if (language == AppLanguage.EN) dateFormat.format(now) else "${formatBanglaDate(now)} | ${banglaWeekday(now)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.White.copy(alpha = 0.85f)
                 )
-                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = "Play Adhan", tint = Color.White, modifier = Modifier.clickable(onClick = onPlayAdhan))
+                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = tr("Play Adhan", "আজান বাজান"), tint = Color.White, modifier = Modifier.clickable(onClick = onPlayAdhan))
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = IslamicGoldLight.copy(alpha = 0.4f))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(text = "Next Prayer", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.8f))
+                    Text(text = tr("Next Prayer", "পরবর্তী নামাজ"), style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.8f))
                     Text(
-                        text = nextPrayer?.first?.prayerName?.displayName ?: "-",
+                        text = nextPrayer?.first?.prayerName?.label() ?: "-",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = IslamicGoldLight
@@ -294,14 +296,14 @@ private fun PrayerCountdownCard(
                     }
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Current Time", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.8f))
+                    Text(text = tr("Current Time", "বর্তমান সময়"), style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.8f))
                     Text(
                         text = clockFormat.format(now),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
-                    Text(text = "Dhaka, Bangladesh", style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                    Text(text = tr("Dhaka, Bangladesh", "ঢাকা, বাংলাদেশ"), style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
                 }
             }
 
@@ -312,7 +314,7 @@ private fun PrayerCountdownCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Adhan Notifications", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+                Text(text = tr("Adhan Notifications", "আজানের নোটিফিকেশন"), style = MaterialTheme.typography.bodyMedium, color = Color.White)
                 Switch(
                     checked = allEnabled,
                     onCheckedChange = onToggleAll,
@@ -340,10 +342,9 @@ private fun PrayerTable(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Text("Prayer", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1.1f))
-                Text("নামায", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.9f))
-                Text("Time", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text("Adhan", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                Text(tr("Prayer", "নামাজ"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(2f))
+                Text(tr("Time", "সময়"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(tr("Adhan", "আজান"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
             }
             HorizontalDivider()
             sorted.forEachIndexed { index, prayer ->
@@ -355,16 +356,15 @@ private fun PrayerTable(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(modifier = Modifier.weight(1.1f), verticalAlignment = Alignment.CenterVertically) {
+                    Row(modifier = Modifier.weight(2f), verticalAlignment = Alignment.CenterVertically) {
                         Text(text = prayerIcon(prayer.prayerName), fontSize = 16.sp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = prayer.prayerName.displayName,
+                            text = prayer.prayerName.label(),
                             fontWeight = if (isNext) FontWeight.Bold else FontWeight.Medium,
                             color = if (isNext) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                         )
                     }
-                    Text(text = prayerBnName(prayer.prayerName), modifier = Modifier.weight(0.9f), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(
                         text = timeFormat.format(prayer.time),
                         modifier = Modifier.weight(1f),

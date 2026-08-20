@@ -24,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayybay.app.domain.model.LinkCategory
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.language.bnLabel
+import com.ayybay.app.presentation.language.label
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.LinkCategoryItem
 import com.ayybay.app.presentation.mvi.LinkUiState
 
@@ -39,10 +42,7 @@ fun DailyLinksScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(text = "Useful Websites", fontWeight = FontWeight.Bold)
-                        Text(text = "গুরুত্বপূর্ণ ওয়েবসাইট", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+                    Text(text = tr("Useful Websites", "গুরুত্বপূর্ণ ওয়েবসাইট"), fontWeight = FontWeight.Bold)
                 },
                 actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
             )
@@ -60,7 +60,11 @@ fun DailyLinksScreen(
         } else {
             val visibleCategories = uiState.categories
                 .filter { it.count > 0 }
-                .filter { searchQuery.isBlank() || it.category.displayName.contains(searchQuery, ignoreCase = true) }
+                .filter {
+                    searchQuery.isBlank() ||
+                        it.category.displayName.contains(searchQuery, ignoreCase = true) ||
+                        it.category.bnLabel().contains(searchQuery, ignoreCase = true)
+                }
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -79,7 +83,7 @@ fun DailyLinksScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 4.dp),
-                        placeholder = { Text("Search websites…") },
+                        placeholder = { Text(tr("Search websites…", "ওয়েবসাইট খুঁজুন…")) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         singleLine = true,
                         shape = RoundedCornerShape(50)
@@ -128,13 +132,13 @@ fun CategoryCard(
             }
             Column {
                 Text(
-                    text = categoryItem.category.displayName,
+                    text = categoryItem.category.label(),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
-                    text = "${categoryItem.count} Websites",
+                    text = tr("${categoryItem.count} Websites", "${categoryItem.count}টি ওয়েবসাইট"),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

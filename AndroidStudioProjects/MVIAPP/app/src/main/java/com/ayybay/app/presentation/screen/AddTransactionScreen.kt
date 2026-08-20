@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.ayybay.app.domain.model.Transaction
 import com.ayybay.app.domain.model.TransactionType
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.util.ExpenseCategory
 import com.ayybay.app.presentation.util.IncomeCategory
 import com.ayybay.app.ui.theme.ExpenseRed
@@ -82,9 +83,9 @@ fun AddTransactionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = if (isEditing) "Edit Transaction" else "Add Transaction", fontWeight = FontWeight.Bold) },
+                title = { Text(text = if (isEditing) tr("Edit Transaction", "লেনদেন সম্পাদনা") else tr("Add Transaction", "লেনদেন যোগ করুন"), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে")) }
                 },
                 actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
             )
@@ -106,7 +107,7 @@ fun AddTransactionScreen(
                     .padding(4.dp)
             ) {
                 TypeToggleButton(
-                    label = "Expense (খরচ)",
+                    label = tr("Expense", "খরচ"),
                     icon = Icons.Default.ArrowDownward,
                     selected = type == TransactionType.EXPENSE,
                     color = ExpenseRed,
@@ -115,7 +116,7 @@ fun AddTransactionScreen(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 TypeToggleButton(
-                    label = "Income (আয়)",
+                    label = tr("Income", "আয়"),
                     icon = Icons.Default.ArrowUpward,
                     selected = type == TransactionType.INCOME,
                     color = IncomeGreen,
@@ -126,7 +127,7 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Amount (টাকার পরিমাণ)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            Text(text = tr("Amount", "টাকার পরিমাণ"), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(6.dp))
             OutlinedTextField(
                 value = amount,
@@ -151,7 +152,7 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Category (${if (type == TransactionType.EXPENSE) "খরচের ধরন" else "আয়ের ধরন"})", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            Text(text = tr("Category", "ধরন"), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(10.dp))
 
             if (type == TransactionType.EXPENSE) {
@@ -184,14 +185,14 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Description (বিবরণ)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            Text(text = tr("Description", "বিবরণ"), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(6.dp))
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Description, contentDescription = null) },
-                placeholder = { Text("e.g. Electricity Bill") },
+                placeholder = { Text(tr("e.g. Electricity Bill", "যেমন: বিদ্যুৎ বিল")) },
                 singleLine = true
             )
 
@@ -199,7 +200,7 @@ fun AddTransactionScreen(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Date (তারিখ)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                    Text(text = tr("Date", "তারিখ"), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedCard(
                         modifier = Modifier
@@ -217,7 +218,7 @@ fun AddTransactionScreen(
                     }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = "Payment Method", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                    Text(text = tr("Payment Method", "পরিশোধের মাধ্যম"), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold, maxLines = 1)
                     Spacer(modifier = Modifier.height(6.dp))
                     Box {
                         OutlinedCard(
@@ -242,14 +243,14 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Text(text = "Note (ঐচ্ছিক নোট)", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            Text(text = tr("Note (optional)", "ঐচ্ছিক নোট"), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.height(6.dp))
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
-                placeholder = { Text("Add a note (optional)") },
+                placeholder = { Text(tr("Add a note (optional)", "একটি নোট যোগ করুন (ঐচ্ছিক)")) },
                 minLines = 2
             )
 
@@ -280,7 +281,7 @@ fun AddTransactionScreen(
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = if (isEditing) "Update Transaction" else "Save Transaction", fontWeight = FontWeight.Bold)
+                    Text(text = if (isEditing) tr("Update Transaction", "লেনদেন আপডেট করুন") else tr("Save Transaction", "লেনদেন সংরক্ষণ করুন"), fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -295,10 +296,10 @@ fun AddTransactionScreen(
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis -> date = Date(millis) }
                     showDatePicker = false
-                }) { Text("OK") }
+                }) { Text(tr("OK", "ঠিক আছে")) }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text(tr("Cancel", "বাতিল")) }
             }
         ) {
             DatePicker(state = datePickerState)
@@ -358,10 +359,9 @@ private fun CategoryTile(
                 .padding(vertical = 12.dp, horizontal = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(24.dp))
+            Icon(icon, contentDescription = tr(label, labelBn), tint = color, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.height(6.dp))
-            Text(text = label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
-            Text(text = labelBn, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp, maxLines = 1)
+            Text(text = tr(label, labelBn), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
         }
         if (selected) {
             Box(

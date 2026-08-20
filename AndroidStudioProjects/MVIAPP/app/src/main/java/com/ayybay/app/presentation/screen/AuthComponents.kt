@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayybay.app.R
+import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.ui.theme.IslamicGreen
 
 @Composable
@@ -49,7 +50,7 @@ fun AuthScaffold(
             if (error != null) {
                 Snackbar(
                     modifier = Modifier.padding(16.dp),
-                    action = { TextButton(onClick = onDismissError) { Text("Dismiss") } }
+                    action = { TextButton(onClick = onDismissError) { Text(tr("Dismiss", "বাতিল করুন")) } }
                 ) { Text(error) }
             }
         }
@@ -96,7 +97,10 @@ fun AuthScaffold(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "By continuing, you agree to sign in with your Google\naccount. We never see your Google password.",
+                text = tr(
+                    "By continuing, you agree to sign in with your Google\naccount. We never see your Google password.",
+                    "চালিয়ে গেলে আপনি আপনার Google অ্যাকাউন্ট দিয়ে সাইন ইন করতে সম্মত হচ্ছেন।\nআমরা কখনো আপনার Google পাসওয়ার্ড দেখি না।"
+                ),
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
