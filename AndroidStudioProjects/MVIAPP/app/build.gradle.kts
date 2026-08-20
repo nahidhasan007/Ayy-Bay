@@ -19,6 +19,21 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "env"
+    productFlavors {
+        create("stage") {
+            dimension = "env"
+            applicationIdSuffix = ".stage"
+            versionNameSuffix = "-stage"
+            resValue("string", "app_name", "Jibon (Stage)")
+            buildConfigField("String", "ENVIRONMENT", "\"stage\"")
+        }
+        create("prod") {
+            dimension = "env"
+            buildConfigField("String", "ENVIRONMENT", "\"prod\"")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,6 +53,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 }
 
