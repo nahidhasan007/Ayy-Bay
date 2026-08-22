@@ -150,7 +150,7 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (authUiState.isLoggedIn) Screen.Home.route else Screen.Login.route,
+            startDestination = Screen.Home.route,/* if (authUiState.isLoggedIn) Screen.Home.route else Screen.Login.route*/
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Login.route) {

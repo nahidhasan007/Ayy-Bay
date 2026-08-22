@@ -64,7 +64,7 @@ fun AuthScaffold(
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.mipmap.ic_launcher_round),
+                painter = painterResource(id = R.drawable.ic_google_logo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(88.dp)
