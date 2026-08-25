@@ -8,17 +8,25 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ayybay.app.data.local.entity.LinkEntity
+import com.ayybay.app.data.local.entity.NoteEntity
+import com.ayybay.app.data.local.entity.PrayerLogEntity
 import com.ayybay.app.data.local.entity.PrayerSettingsEntity
 import com.ayybay.app.data.local.entity.PrayerTimeEntity
+import com.ayybay.app.data.local.entity.QuranReadDayEntity
+import com.ayybay.app.data.local.entity.SurahProgressEntity
 
 @Database(
     entities = [
         TransactionEntity::class,
         PrayerTimeEntity::class,
         PrayerSettingsEntity::class,
-        LinkEntity::class
+        LinkEntity::class,
+        NoteEntity::class,
+        PrayerLogEntity::class,
+        SurahProgressEntity::class,
+        QuranReadDayEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -27,6 +35,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
     abstract fun prayerTimeDao(): PrayerTimeDao
     abstract fun linkDao(): LinkDao
+    abstract fun noteDao(): NoteDao
+    abstract fun prayerLogDao(): PrayerLogDao
+    abstract fun quranProgressDao(): QuranProgressDao
 
     companion object {
         private const val DATABASE_NAME = "ayybay_database"
@@ -58,6 +69,50 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `notes` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `body` TEXT NOT NULL,
+                        `isPinned` INTEGER NOT NULL DEFAULT 0,
+                        `createdAt` INTEGER NOT NULL,
+                        `updatedAt` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `prayer_logs` (
+                        `dateKey` INTEGER NOT NULL,
+                        `prayerName` TEXT NOT NULL,
+                        `isPrayed` INTEGER NOT NULL,
+                        PRIMARY KEY(`dateKey`, `prayerName`)
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `surah_progress` (
+                        `surahNumber` INTEGER PRIMARY KEY NOT NULL,
+                        `isCompleted` INTEGER NOT NULL,
+                        `completedAt` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `quran_read_days` (
+                        `dateKey` INTEGER PRIMARY KEY NOT NULL,
+                        `surahsOpened` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -65,7 +120,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build()
                 INSTANCE = instance
                 instance

@@ -35,3 +35,18 @@ fun banglaWeekday(date: Date): String {
     val cal = Calendar.getInstance().apply { time = date }
     return banglaWeekdays[cal.get(Calendar.DAY_OF_WEEK)] ?: ""
 }
+
+private val banglaWeekdaysShort = mapOf(
+    Calendar.SATURDAY to "শনি",
+    Calendar.SUNDAY to "রবি",
+    Calendar.MONDAY to "সোম",
+    Calendar.TUESDAY to "মঙ্গল",
+    Calendar.WEDNESDAY to "বুধ",
+    Calendar.THURSDAY to "বৃহঃ",
+    Calendar.FRIDAY to "শুক্র"
+)
+
+fun banglaWeekdayShort(date: Date): String {
+    val cal = Calendar.getInstance().apply { time = date }
+    return banglaWeekdaysShort[cal.get(Calendar.DAY_OF_WEEK)] ?: ""
+}

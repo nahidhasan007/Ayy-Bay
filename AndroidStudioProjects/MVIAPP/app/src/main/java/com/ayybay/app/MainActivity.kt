@@ -20,9 +20,12 @@ import androidx.core.content.ContextCompat
 import com.ayybay.app.presentation.language.LocalAppLanguage
 import com.ayybay.app.presentation.navigation.AppNavigation
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
+import com.ayybay.app.presentation.viewmodel.HealthViewModel
 import com.ayybay.app.presentation.viewmodel.LanguageViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
+import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
+import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.ui.theme.MVIAPPTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -34,6 +37,9 @@ class MainActivity : ComponentActivity() {
     private val prayerViewModel: PrayerViewModel by viewModel()
     private val linkViewModel: LinkViewModel by viewModel()
     private val languageViewModel: LanguageViewModel by viewModel()
+    private val noteViewModel: NoteViewModel by viewModel()
+    private val trackerViewModel: TrackerViewModel by viewModel()
+    private val healthViewModel: HealthViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +57,10 @@ class MainActivity : ComponentActivity() {
                             authViewModel = authViewModel,
                             transactionViewModel = transactionViewModel,
                             prayerViewModel = prayerViewModel,
-                            linkViewModel = linkViewModel
+                            linkViewModel = linkViewModel,
+                            noteViewModel = noteViewModel,
+                            trackerViewModel = trackerViewModel,
+                            healthViewModel = healthViewModel
                         )
                     }
                 }

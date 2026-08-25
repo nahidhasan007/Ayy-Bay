@@ -13,7 +13,10 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
@@ -71,6 +74,9 @@ fun HomeScreen(
     onNavigateJobs: () -> Unit = {},
     onNavigateWebsites: () -> Unit = {},
     onNavigateBooks: () -> Unit = {},
+    onNavigateNotes: () -> Unit = {},
+    onNavigateSalahTracker: () -> Unit = {},
+    onNavigateBmiCalculator: () -> Unit = {},
     onSignOut: () -> Unit = {}
 ) {
     Scaffold(modifier = modifier) { paddingValues ->
@@ -91,7 +97,17 @@ fun HomeScreen(
                 )
             }
 
-            item { QuickAccessSection(onNavigateFinance, onNavigateJobs, onNavigateWebsites, onNavigateBooks) }
+            item {
+                QuickAccessSection(
+                    onNavigateFinance = onNavigateFinance,
+                    onNavigateJobs = onNavigateJobs,
+                    onNavigateWebsites = onNavigateWebsites,
+                    onNavigateBooks = onNavigateBooks,
+                    onNavigateNotes = onNavigateNotes,
+                    onNavigateSalahTracker = onNavigateSalahTracker,
+                    onNavigateBmiCalculator = onNavigateBmiCalculator
+                )
+            }
 
             item { TodaysOverviewSection(uiState = uiState, onViewAll = onNavigateFinance) }
         }
@@ -373,7 +389,10 @@ private fun QuickAccessSection(
     onNavigateFinance: () -> Unit,
     onNavigateJobs: () -> Unit,
     onNavigateWebsites: () -> Unit,
-    onNavigateBooks: () -> Unit
+    onNavigateBooks: () -> Unit,
+    onNavigateNotes: () -> Unit,
+    onNavigateSalahTracker: () -> Unit,
+    onNavigateBmiCalculator: () -> Unit
 ) {
     Column {
         Text(
@@ -383,20 +402,35 @@ private fun QuickAccessSection(
         )
         Spacer(modifier = Modifier.height(10.dp))
 
-        val items = listOf(
+        val firstRow = listOf(
             QuickAccessItem("Expense Tracker", "খরচ ট্র্যাকার", Icons.Default.AccountBalanceWallet, IncomeGreen, onNavigateFinance),
             QuickAccessItem("Govt Jobs", "সরকারি চাকরি", Icons.Default.Work, IncomeGreen, onNavigateJobs),
             QuickAccessItem("Useful Websites", "গুরুত্বপূর্ণ ওয়েবসাইট", Icons.Default.Public, Color(0xFF1976D2), onNavigateWebsites),
             QuickAccessItem("Religious Books", "ধর্মীয় গ্রন্থ", Icons.AutoMirrored.Filled.MenuBook, IncomeGreen, onNavigateBooks)
+        )
+        val secondRow = listOf(
+            QuickAccessItem("Notes", "নোট", Icons.Default.Description, IncomeGreen, onNavigateNotes),
+            QuickAccessItem("Salah Tracker", "নামাজ ট্র্যাকার", Icons.Default.Mosque, IncomeGreen, onNavigateSalahTracker),
+            QuickAccessItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator)
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items.forEach { item ->
+            firstRow.forEach { item ->
                 QuickAccessTile(item = item, modifier = Modifier.weight(1f))
             }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            secondRow.forEach { item ->
+                QuickAccessTile(item = item, modifier = Modifier.weight(1f))
+            }
+            repeat(firstRow.size - secondRow.size) { Spacer(modifier = Modifier.weight(1f)) }
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Work
@@ -21,25 +22,38 @@ import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.AuthUiEffect
 import com.ayybay.app.presentation.mvi.AuthUiIntent
 import com.ayybay.app.presentation.mvi.LinkUiIntent
+import com.ayybay.app.presentation.mvi.NoteUiIntent
+import com.ayybay.app.presentation.mvi.TrackerUiIntent
 import com.ayybay.app.presentation.mvi.TransactionUiIntent
+import com.ayybay.app.presentation.screen.AddNoteScreen
 import com.ayybay.app.presentation.screen.AddTransactionScreen
+import com.ayybay.app.presentation.screen.AgeCalculatorScreen
+import com.ayybay.app.presentation.screen.BmiCalculatorScreen
 import com.ayybay.app.presentation.screen.BookListScreen
 import com.ayybay.app.presentation.screen.BooksScreen
 import com.ayybay.app.presentation.screen.DailyLinksScreen
 import com.ayybay.app.presentation.screen.FinanceScreen
+import com.ayybay.app.presentation.screen.FitnessAdviceScreen
 import com.ayybay.app.presentation.screen.HomeScreen
 import com.ayybay.app.presentation.screen.JobsScreen
 import com.ayybay.app.presentation.screen.LinkListScreen
 import com.ayybay.app.presentation.screen.LinkWebViewScreen
 import com.ayybay.app.presentation.screen.LoginScreen
+import com.ayybay.app.presentation.screen.MoreScreen
+import com.ayybay.app.presentation.screen.NotesScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
+import com.ayybay.app.presentation.screen.QuranProgressScreen
+import com.ayybay.app.presentation.screen.SalahTrackerScreen
 import com.ayybay.app.presentation.screen.SignUpScreen
 import com.ayybay.app.presentation.screen.SurahListScreen
 import com.ayybay.app.presentation.screen.SurahWebViewScreen
 import com.ayybay.app.data.local.QuranSurahData
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
+import com.ayybay.app.presentation.viewmodel.HealthViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
+import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
+import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 
 sealed class Screen(val route: String) {
@@ -67,6 +81,16 @@ sealed class Screen(val route: String) {
     object LinkWebView : Screen("link_webview/{linkId}") {
         fun createRoute(linkId: Long) = "link_webview/$linkId"
     }
+    object More : Screen("more")
+    object Notes : Screen("notes")
+    object AddNote : Screen("add_note?noteId={noteId}") {
+        fun createRoute(noteId: Long = -1L) = "add_note?noteId=$noteId"
+    }
+    object SalahTracker : Screen("salah_tracker")
+    object QuranProgress : Screen("quran_progress")
+    object AgeCalculator : Screen("age_calculator")
+    object BmiCalculator : Screen("bmi_calculator")
+    object FitnessAdvice : Screen("fitness_advice")
 }
 
 private data class BottomNavItem(
@@ -80,7 +104,10 @@ fun AppNavigation(
     authViewModel: AuthViewModel,
     transactionViewModel: TransactionViewModel,
     prayerViewModel: PrayerViewModel,
-    linkViewModel: LinkViewModel
+    linkViewModel: LinkViewModel,
+    noteViewModel: NoteViewModel,
+    trackerViewModel: TrackerViewModel,
+    healthViewModel: HealthViewModel
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
 
@@ -114,8 +141,8 @@ fun AppNavigation(
         BottomNavItem(Screen.Home.route, tr("Home", "হোম"), Icons.Default.Home),
         BottomNavItem(Screen.Finance.route, tr("Finance", "আর্থিক"), Icons.Default.AccountBalanceWallet),
         BottomNavItem(Screen.Jobs.route, tr("Jobs", "চাকরি"), Icons.Default.Work),
-        BottomNavItem(Screen.DailyLinks.route, tr("Websites", "ওয়েবসাইট"), Icons.Default.Public),
-        BottomNavItem(Screen.Books.route, tr("Books", "বই"), Icons.AutoMirrored.Filled.MenuBook)
+        BottomNavItem(Screen.Books.route, tr("Books", "বই"), Icons.AutoMirrored.Filled.MenuBook),
+        BottomNavItem(Screen.More.route, tr("More", "আরও"), Icons.Default.Apps)
     )
 
     val showBottomBar = bottomNavItems.any { it.route == currentRoute }
@@ -123,6 +150,9 @@ fun AppNavigation(
     val transactionUiState by transactionViewModel.uiState.collectAsState()
     val prayerTimes by prayerViewModel.prayerTimes.collectAsState()
     val prayerSettings by prayerViewModel.prayerSettings.collectAsState()
+    val noteUiState by noteViewModel.uiState.collectAsState()
+    val trackerUiState by trackerViewModel.uiState.collectAsState()
+    val healthUiState by healthViewModel.uiState.collectAsState()
 
     Scaffold(
         bottomBar = {
@@ -213,6 +243,9 @@ fun AppNavigation(
                             restoreState = true
                         }
                     },
+                    onNavigateNotes = { navController.navigate(Screen.Notes.route) },
+                    onNavigateSalahTracker = { navController.navigate(Screen.SalahTracker.route) },
+                    onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
                 )
             }
@@ -284,7 +317,12 @@ fun AppNavigation(
             }
 
             composable(Screen.SurahList.route) {
+                val completedNumbers = trackerUiState.quranProgress.filter { it.isCompleted }.map { it.surahNumber }.toSet()
                 SurahListScreen(
+                    completedNumbers = completedNumbers,
+                    onToggleComplete = { surahNumber, completed ->
+                        trackerViewModel.handleIntent(TrackerUiIntent.ToggleSurahComplete(surahNumber, completed))
+                    },
                     onSurahClick = { surah -> navController.navigate(Screen.SurahWebView.createRoute(surah.number)) },
                     onBack = { navController.popBackStack() }
                 )
@@ -296,6 +334,9 @@ fun AppNavigation(
             ) { backStackEntry ->
                 val surahNumber = backStackEntry.arguments?.getInt("surahNumber") ?: return@composable
                 val surah = QuranSurahData.surahs().find { it.number == surahNumber } ?: return@composable
+                LaunchedEffect(surahNumber) {
+                    trackerViewModel.handleIntent(TrackerUiIntent.MarkSurahOpened(surahNumber))
+                }
                 SurahWebViewScreen(
                     url = surah.url,
                     title = "${surah.number}. ${tr(surah.name, surah.nameBn)}",
@@ -342,6 +383,98 @@ fun AppNavigation(
                 LinkWebViewScreen(
                     linkId = linkId,
                     linkViewModel = linkViewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.More.route) {
+                MoreScreen(
+                    onNavigateNotes = { navController.navigate(Screen.Notes.route) },
+                    onNavigateSalahTracker = { navController.navigate(Screen.SalahTracker.route) },
+                    onNavigateQuranProgress = { navController.navigate(Screen.QuranProgress.route) },
+                    onNavigateAgeCalculator = { navController.navigate(Screen.AgeCalculator.route) },
+                    onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
+                    onNavigateFitnessAdvice = { navController.navigate(Screen.FitnessAdvice.route) },
+                    onNavigateWebsites = { navController.navigate(Screen.DailyLinks.route) }
+                )
+            }
+
+            composable(Screen.Notes.route) {
+                NotesScreen(
+                    notes = noteUiState.visibleNotes,
+                    searchQuery = noteUiState.searchQuery,
+                    onSearchChange = { query -> noteViewModel.handleIntent(NoteUiIntent.Search(query)) },
+                    onAddNote = { navController.navigate(Screen.AddNote.createRoute()) },
+                    onEditNote = { note -> navController.navigate(Screen.AddNote.createRoute(note.id)) },
+                    onDeleteNote = { note -> noteViewModel.handleIntent(NoteUiIntent.DeleteNote(note)) },
+                    onTogglePin = { note -> noteViewModel.handleIntent(NoteUiIntent.TogglePin(note)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.AddNote.route,
+                arguments = listOf(navArgument("noteId") { type = NavType.LongType; defaultValue = -1L })
+            ) { backStackEntry ->
+                val noteId = backStackEntry.arguments?.getLong("noteId") ?: -1L
+                val existing = noteUiState.allNotes.find { it.id == noteId }
+                AddNoteScreen(
+                    note = existing,
+                    onSave = { note -> noteViewModel.handleIntent(NoteUiIntent.SaveNote(note)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.SalahTracker.route) {
+                SalahTrackerScreen(
+                    prayerTimes = prayerTimes,
+                    todayPrayerLogs = trackerUiState.todayPrayerLogs,
+                    weeklyProgress = trackerUiState.weeklyPrayerProgress,
+                    onTogglePrayer = { prayerName, isPrayed ->
+                        trackerViewModel.handleIntent(TrackerUiIntent.TogglePrayer(prayerName, isPrayed))
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.QuranProgress.route) {
+                QuranProgressScreen(
+                    completedCount = trackerUiState.quranCompletedCount,
+                    totalSurahs = QuranSurahData.surahs().size,
+                    streakDays = trackerUiState.quranStreak,
+                    weeklyReading = trackerUiState.quranWeeklyReading,
+                    onOpenSurahList = { navController.navigate(Screen.SurahList.route) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.AgeCalculator.route) {
+                AgeCalculatorScreen(
+                    dateOfBirth = healthUiState.dateOfBirth,
+                    onSetDateOfBirth = { millis -> healthViewModel.setDateOfBirth(millis) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.BmiCalculator.route) {
+                BmiCalculatorScreen(
+                    initialHeightCm = healthUiState.heightCm,
+                    initialWeightKg = healthUiState.weightKg,
+                    onSave = { heightCm, weightKg ->
+                        healthViewModel.setHeightCm(heightCm)
+                        healthViewModel.setWeightKg(weightKg)
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.FitnessAdvice.route) {
+                FitnessAdviceScreen(
+                    dateOfBirth = healthUiState.dateOfBirth,
+                    heightCm = healthUiState.heightCm,
+                    weightKg = healthUiState.weightKg,
+                    onNavigateAge = { navController.navigate(Screen.AgeCalculator.route) },
+                    onNavigateBmi = { navController.navigate(Screen.BmiCalculator.route) },
                     onBack = { navController.popBackStack() }
                 )
             }
