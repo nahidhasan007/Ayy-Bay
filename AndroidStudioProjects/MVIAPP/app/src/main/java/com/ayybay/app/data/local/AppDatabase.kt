@@ -26,7 +26,7 @@ import com.ayybay.app.data.local.entity.SurahProgressEntity
         SurahProgressEntity::class,
         QuranReadDayEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -113,6 +113,26 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // insertPrayerTimes() used OnConflictStrategy.REPLACE against an
+                // autoGenerate id, which never collides, so every schedule run (each
+                // app start) appended a fresh set of rows for the same day instead of
+                // replacing them. Drop the accumulated duplicates before adding the
+                // unique index, keeping the newest row per (date, prayerName).
+                database.execSQL(
+                    """
+                    DELETE FROM prayer_times WHERE id NOT IN (
+                        SELECT MAX(id) FROM prayer_times GROUP BY date, prayerName
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_prayer_times_date_prayerName` ON `prayer_times` (`date`, `prayerName`)"
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -120,7 +140,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Star
@@ -77,6 +78,7 @@ fun HomeScreen(
     onNavigateNotes: () -> Unit = {},
     onNavigateSalahTracker: () -> Unit = {},
     onNavigateBmiCalculator: () -> Unit = {},
+    onNavigateProfile: () -> Unit = {},
     onSignOut: () -> Unit = {}
 ) {
     Scaffold(modifier = modifier) { paddingValues ->
@@ -87,7 +89,14 @@ fun HomeScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            item { HomeHeader(userName = userName, userEmail = userEmail, onSignOut = onSignOut) }
+            item {
+                HomeHeader(
+                    userName = userName,
+                    userEmail = userEmail,
+                    onNavigateProfile = onNavigateProfile,
+                    onSignOut = onSignOut
+                )
+            }
 
             item {
                 NextPrayerCard(
@@ -118,6 +127,7 @@ fun HomeScreen(
 private fun HomeHeader(
     userName: String,
     userEmail: String?,
+    onNavigateProfile: () -> Unit,
     onSignOut: () -> Unit
 ) {
     val today = remember { Date() }
@@ -175,7 +185,12 @@ private fun HomeHeader(
             Spacer(modifier = Modifier.width(4.dp))
             LanguageToggle()
             Spacer(modifier = Modifier.width(4.dp))
-            AccountAvatarMenu(userName = userName, userEmail = userEmail, onSignOut = onSignOut)
+            AccountAvatarMenu(
+                userName = userName,
+                userEmail = userEmail,
+                onNavigateProfile = onNavigateProfile,
+                onSignOut = onSignOut
+            )
         }
     }
 }
@@ -184,6 +199,7 @@ private fun HomeHeader(
 private fun AccountAvatarMenu(
     userName: String,
     userEmail: String?,
+    onNavigateProfile: () -> Unit,
     onSignOut: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -204,7 +220,14 @@ private fun AccountAvatarMenu(
             )
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .clickable {
+                        expanded = false
+                        onNavigateProfile()
+                    }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
                 Text(text = userName, fontWeight = FontWeight.Bold)
                 if (userEmail != null) {
                     Text(
@@ -215,6 +238,14 @@ private fun AccountAvatarMenu(
                 }
             }
             HorizontalDivider()
+            DropdownMenuItem(
+                text = { Text(tr("Profile", "প্রোফাইল")) },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onNavigateProfile()
+                }
+            )
             DropdownMenuItem(
                 text = { Text(tr("Sign out", "সাইন আউট")) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null) },
@@ -460,6 +491,7 @@ private fun QuickAccessTile(item: QuickAccessItem, modifier: Modifier = Modifier
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
+            minLines = 2,
             maxLines = 2
         )
     }

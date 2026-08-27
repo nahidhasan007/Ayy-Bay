@@ -1,9 +1,13 @@
 package com.ayybay.app.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "prayer_times")
+@Entity(
+    tableName = "prayer_times",
+    indices = [Index(value = ["date", "prayerName"], unique = true)]
+)
 data class PrayerTimeEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

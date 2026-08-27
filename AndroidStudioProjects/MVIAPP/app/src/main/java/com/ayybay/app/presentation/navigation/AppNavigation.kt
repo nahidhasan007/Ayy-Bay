@@ -42,6 +42,7 @@ import com.ayybay.app.presentation.screen.LoginScreen
 import com.ayybay.app.presentation.screen.MoreScreen
 import com.ayybay.app.presentation.screen.NotesScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
+import com.ayybay.app.presentation.screen.ProfileScreen
 import com.ayybay.app.presentation.screen.QuranProgressScreen
 import com.ayybay.app.presentation.screen.SalahTrackerScreen
 import com.ayybay.app.presentation.screen.SignUpScreen
@@ -82,6 +83,7 @@ sealed class Screen(val route: String) {
         fun createRoute(linkId: Long) = "link_webview/$linkId"
     }
     object More : Screen("more")
+    object Profile : Screen("profile")
     object Notes : Screen("notes")
     object AddNote : Screen("add_note?noteId={noteId}") {
         fun createRoute(noteId: Long = -1L) = "add_note?noteId=$noteId"
@@ -246,6 +248,16 @@ fun AppNavigation(
                     onNavigateNotes = { navController.navigate(Screen.Notes.route) },
                     onNavigateSalahTracker = { navController.navigate(Screen.SalahTracker.route) },
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
+                    onNavigateProfile = { navController.navigate(Screen.Profile.route) },
+                    onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
+                )
+            }
+
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    userName = authUiState.user?.displayName ?: tr("Guest", "অতিথি"),
+                    userEmail = authUiState.user?.email,
+                    onBack = { navController.popBackStack() },
                     onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
                 )
             }
