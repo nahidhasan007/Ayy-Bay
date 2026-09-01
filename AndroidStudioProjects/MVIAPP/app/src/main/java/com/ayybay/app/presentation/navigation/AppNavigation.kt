@@ -19,15 +19,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.*
 import androidx.navigation.compose.*
 import com.ayybay.app.presentation.language.tr
+import com.ayybay.app.presentation.mvi.AlarmUiEffect
+import com.ayybay.app.presentation.mvi.AlarmUiIntent
 import com.ayybay.app.presentation.mvi.AuthUiEffect
 import com.ayybay.app.presentation.mvi.AuthUiIntent
 import com.ayybay.app.presentation.mvi.LinkUiIntent
 import com.ayybay.app.presentation.mvi.NoteUiIntent
 import com.ayybay.app.presentation.mvi.TrackerUiIntent
 import com.ayybay.app.presentation.mvi.TransactionUiIntent
+import com.ayybay.app.presentation.screen.AddAlarmScreen
 import com.ayybay.app.presentation.screen.AddNoteScreen
 import com.ayybay.app.presentation.screen.AddTransactionScreen
 import com.ayybay.app.presentation.screen.AgeCalculatorScreen
+import com.ayybay.app.presentation.screen.AlarmScreen
 import com.ayybay.app.presentation.screen.BmiCalculatorScreen
 import com.ayybay.app.presentation.screen.BookListScreen
 import com.ayybay.app.presentation.screen.BooksScreen
@@ -41,6 +45,7 @@ import com.ayybay.app.presentation.screen.LinkWebViewScreen
 import com.ayybay.app.presentation.screen.LoginScreen
 import com.ayybay.app.presentation.screen.MoreScreen
 import com.ayybay.app.presentation.screen.NotesScreen
+import com.ayybay.app.presentation.screen.PhoneBookScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
 import com.ayybay.app.presentation.screen.ProfileScreen
 import com.ayybay.app.presentation.screen.QuranProgressScreen
@@ -49,10 +54,12 @@ import com.ayybay.app.presentation.screen.SignUpScreen
 import com.ayybay.app.presentation.screen.SurahListScreen
 import com.ayybay.app.presentation.screen.SurahWebViewScreen
 import com.ayybay.app.data.local.QuranSurahData
+import com.ayybay.app.presentation.viewmodel.AlarmViewModel
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.HealthViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
+import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
@@ -93,6 +100,11 @@ sealed class Screen(val route: String) {
     object AgeCalculator : Screen("age_calculator")
     object BmiCalculator : Screen("bmi_calculator")
     object FitnessAdvice : Screen("fitness_advice")
+    object PhoneBook : Screen("phone_book")
+    object Alarms : Screen("alarms")
+    object AddAlarm : Screen("add_alarm?alarmId={alarmId}") {
+        fun createRoute(alarmId: Long = -1L) = "add_alarm?alarmId=$alarmId"
+    }
 }
 
 private data class BottomNavItem(
@@ -109,7 +121,9 @@ fun AppNavigation(
     linkViewModel: LinkViewModel,
     noteViewModel: NoteViewModel,
     trackerViewModel: TrackerViewModel,
-    healthViewModel: HealthViewModel
+    healthViewModel: HealthViewModel,
+    alarmViewModel: AlarmViewModel,
+    phoneBookViewModel: PhoneBookViewModel
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
 
@@ -155,6 +169,14 @@ fun AppNavigation(
     val noteUiState by noteViewModel.uiState.collectAsState()
     val trackerUiState by trackerViewModel.uiState.collectAsState()
     val healthUiState by healthViewModel.uiState.collectAsState()
+    val alarmUiState by alarmViewModel.uiState.collectAsState()
+    val phoneBookUiState by phoneBookViewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        alarmViewModel.uiEffect.collect { effect ->
+            if (effect is AlarmUiEffect.NavigateBack) navController.popBackStack()
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -182,7 +204,7 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,/* if (authUiState.isLoggedIn) Screen.Home.route else Screen.Login.route*/
+            startDestination = if (authUiState.isLoggedIn) Screen.Home.route else Screen.Login.route,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Login.route) {
@@ -192,7 +214,8 @@ fun AppNavigation(
                     error = authUiState.error,
                     onGoogleSignIn = { authViewModel.handleIntent(AuthUiIntent.SignInWithGoogle(context)) },
                     onNavigateToSignUp = { navController.navigate(Screen.SignUp.route) },
-                    onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) }
+                    onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) },
+                    onContinueAsGuest = { authViewModel.handleIntent(AuthUiIntent.ContinueAsGuest) }
                 )
             }
 
@@ -203,7 +226,8 @@ fun AppNavigation(
                     error = authUiState.error,
                     onGoogleSignUp = { authViewModel.handleIntent(AuthUiIntent.SignInWithGoogle(context)) },
                     onNavigateToLogin = { navController.popBackStack() },
-                    onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) }
+                    onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) },
+                    onContinueAsGuest = { authViewModel.handleIntent(AuthUiIntent.ContinueAsGuest) }
                 )
             }
 
@@ -407,7 +431,41 @@ fun AppNavigation(
                     onNavigateAgeCalculator = { navController.navigate(Screen.AgeCalculator.route) },
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onNavigateFitnessAdvice = { navController.navigate(Screen.FitnessAdvice.route) },
-                    onNavigateWebsites = { navController.navigate(Screen.DailyLinks.route) }
+                    onNavigateWebsites = { navController.navigate(Screen.DailyLinks.route) },
+                    onNavigatePhoneBook = { navController.navigate(Screen.PhoneBook.route) },
+                    onNavigateAlarms = { navController.navigate(Screen.Alarms.route) }
+                )
+            }
+
+            composable(Screen.PhoneBook.route) {
+                PhoneBookScreen(
+                    uiState = phoneBookUiState,
+                    onIntent = { intent -> phoneBookViewModel.handleIntent(intent) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Alarms.route) {
+                AlarmScreen(
+                    alarms = alarmUiState.alarms,
+                    onAddAlarm = { navController.navigate(Screen.AddAlarm.createRoute()) },
+                    onEditAlarm = { alarm -> navController.navigate(Screen.AddAlarm.createRoute(alarm.id)) },
+                    onDeleteAlarm = { alarm -> alarmViewModel.handleIntent(AlarmUiIntent.DeleteAlarm(alarm)) },
+                    onToggleAlarm = { alarm, enabled -> alarmViewModel.handleIntent(AlarmUiIntent.ToggleAlarm(alarm, enabled)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.AddAlarm.route,
+                arguments = listOf(navArgument("alarmId") { type = NavType.LongType; defaultValue = -1L })
+            ) { backStackEntry ->
+                val alarmId = backStackEntry.arguments?.getLong("alarmId") ?: -1L
+                val existing = alarmUiState.alarms.find { it.id == alarmId }
+                AddAlarmScreen(
+                    alarm = existing,
+                    onSave = { alarm -> alarmViewModel.handleIntent(AlarmUiIntent.SaveAlarm(alarm)) },
+                    onBack = { navController.popBackStack() }
                 )
             }
 

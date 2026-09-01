@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.domain.model.Transaction
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.DonutChart
 import com.ayybay.app.presentation.component.TransactionCard
 import com.ayybay.app.presentation.language.tr
@@ -70,11 +71,15 @@ fun FinanceScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Column {
                         Text(text = tr("My Finance", "আমার হিসাব"), fontWeight = FontWeight.Bold)
-                        Text(text = tr("Track your income & expenses", "আপনার আয়-ব্যয়ের হিসাব রাখুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = tr("Track your income & expenses", "আপনার আয়-ব্যয়ের হিসাব রাখুন"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                        )
                     }
                 },
                 navigationIcon = {

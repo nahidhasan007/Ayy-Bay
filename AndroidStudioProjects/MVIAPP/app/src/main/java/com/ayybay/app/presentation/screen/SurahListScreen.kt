@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.data.local.QuranSurahData
 import com.ayybay.app.data.local.Surah
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.language.tr
 
 private val IslamicGreen = androidx.compose.ui.graphics.Color(0xFF1B6B3A)
@@ -36,7 +37,7 @@ fun SurahListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "📖  ")
@@ -51,11 +52,7 @@ fun SurahListScreen(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = IslamicGreen,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
         }
     ) { paddingValues ->

@@ -9,7 +9,8 @@ fun LoginScreen(
     error: String?,
     onGoogleSignIn: () -> Unit,
     onNavigateToSignUp: () -> Unit,
-    onDismissError: () -> Unit
+    onDismissError: () -> Unit,
+    onContinueAsGuest: () -> Unit
 ) {
     AuthScaffold(
         title = tr("Welcome back", "আবার স্বাগতম"),
@@ -32,6 +33,7 @@ fun LoginScreen(
                 actionText = tr("Sign up", "সাইন আপ করুন"),
                 onClick = onNavigateToSignUp
             )
-        }
+        },
+        onContinueAsGuest = onContinueAsGuest
     )
 }

@@ -19,11 +19,13 @@ import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import com.ayybay.app.presentation.language.LocalAppLanguage
 import com.ayybay.app.presentation.navigation.AppNavigation
+import com.ayybay.app.presentation.viewmodel.AlarmViewModel
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.HealthViewModel
 import com.ayybay.app.presentation.viewmodel.LanguageViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
+import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
@@ -40,6 +42,8 @@ class MainActivity : ComponentActivity() {
     private val noteViewModel: NoteViewModel by viewModel()
     private val trackerViewModel: TrackerViewModel by viewModel()
     private val healthViewModel: HealthViewModel by viewModel()
+    private val alarmViewModel: AlarmViewModel by viewModel()
+    private val phoneBookViewModel: PhoneBookViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +64,9 @@ class MainActivity : ComponentActivity() {
                             linkViewModel = linkViewModel,
                             noteViewModel = noteViewModel,
                             trackerViewModel = trackerViewModel,
-                            healthViewModel = healthViewModel
+                            healthViewModel = healthViewModel,
+                            alarmViewModel = alarmViewModel,
+                            phoneBookViewModel = phoneBookViewModel
                         )
                     }
                 }

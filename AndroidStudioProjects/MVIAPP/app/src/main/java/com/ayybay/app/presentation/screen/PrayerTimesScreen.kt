@@ -28,6 +28,7 @@ import com.ayybay.app.domain.model.Madhab
 import com.ayybay.app.domain.model.PrayerName
 import com.ayybay.app.domain.model.PrayerSettings
 import com.ayybay.app.domain.model.PrayerTime
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
 import com.ayybay.app.presentation.language.AppLanguage
 import com.ayybay.app.presentation.language.LocalAppLanguage
@@ -67,7 +68,7 @@ fun PrayerTimesScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Text(text = "🕌  " + tr("Prayer Times", "নামাজের সময়"), fontWeight = FontWeight.Bold)
                 },
@@ -77,7 +78,13 @@ fun PrayerTimesScreen(
                     }
                 },
                 actions = {
-                    LanguageToggle(modifier = Modifier.padding(end = 12.dp))
+                    LanguageToggle(
+                        modifier = Modifier.padding(end = 12.dp),
+                        selectedColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                        borderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                        dividerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
                 }
             )
         },

@@ -43,7 +43,8 @@ fun AuthScaffold(
     error: String?,
     onDismissError: () -> Unit,
     primaryAction: @Composable () -> Unit,
-    footer: @Composable () -> Unit
+    footer: @Composable () -> Unit,
+    onContinueAsGuest: (() -> Unit)? = null
 ) {
     Scaffold(
         snackbarHost = {
@@ -110,6 +111,17 @@ fun AuthScaffold(
             Spacer(modifier = Modifier.height(32.dp))
 
             footer()
+
+            if (onContinueAsGuest != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(onClick = onContinueAsGuest) {
+                    Text(
+                        text = tr("Continue as Guest", "অতিথি হিসেবে চালিয়ে যান"),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

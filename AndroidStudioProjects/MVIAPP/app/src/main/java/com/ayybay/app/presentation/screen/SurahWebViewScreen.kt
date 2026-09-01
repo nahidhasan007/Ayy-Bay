@@ -18,9 +18,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.language.tr
-
-private val IslamicGreen = androidx.compose.ui.graphics.Color(0xFF1B6B3A)
 
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +36,7 @@ fun SurahWebViewScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Text(
                         text = title,
@@ -72,11 +71,7 @@ fun SurahWebViewScreen(
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = IslamicGreen,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
         }
     ) { paddingValues ->

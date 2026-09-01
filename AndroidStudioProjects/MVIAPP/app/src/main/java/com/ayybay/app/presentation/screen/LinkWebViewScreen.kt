@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.LinkUiIntent
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
@@ -48,7 +49,7 @@ fun LinkWebViewScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Text(
                         text = title,
@@ -87,11 +88,7 @@ fun LinkWebViewScreen(
                             )
                         }
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
         }
     ) { paddingValues ->

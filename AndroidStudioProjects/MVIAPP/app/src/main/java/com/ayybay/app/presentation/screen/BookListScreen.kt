@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.data.local.BookSampleData
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.language.tr
 import kotlinx.coroutines.launch
 
@@ -32,7 +33,7 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         category?.let { Text(text = "${it.icon}  ") }
@@ -41,7 +42,13 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে")) }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = color,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

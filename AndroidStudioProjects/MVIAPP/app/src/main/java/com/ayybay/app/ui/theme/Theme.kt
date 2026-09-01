@@ -29,6 +29,7 @@ val IncomeGreen = Color(0xFF2E7D32)
 val ExpenseRed = Color(0xFFE53935)
 val BalanceOrange = Color(0xFFF57C00)
 val InfoBlue = Color(0xFF1976D2)
+val AlarmPurple = Color(0xFF6A4C93)
 
 // Light tint backgrounds for stat cards
 val IncomeGreenTint = Color(0xFFE8F5E9)

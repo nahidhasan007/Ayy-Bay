@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.domain.model.Note
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
 import com.ayybay.app.presentation.language.tr
 
@@ -32,7 +33,7 @@ fun AddNoteScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Text(
                         text = if (isEditing) tr("Edit Note", "নোট সম্পাদনা") else tr("Add Note", "নোট যোগ করুন"),
@@ -44,7 +45,15 @@ fun AddNoteScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
-                actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
+                actions = {
+                    LanguageToggle(
+                        modifier = Modifier.padding(end = 12.dp),
+                        selectedColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                        borderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                        dividerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
+                }
             )
         }
     ) { paddingValues ->

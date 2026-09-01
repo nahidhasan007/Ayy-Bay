@@ -41,8 +41,16 @@ class AuthViewModel(
     fun handleIntent(intent: AuthUiIntent) {
         when (intent) {
             is AuthUiIntent.SignInWithGoogle -> signIn(intent.context)
+            is AuthUiIntent.ContinueAsGuest -> continueAsGuest()
             is AuthUiIntent.SignOut -> signOut()
             is AuthUiIntent.ClearError -> _uiState.value = _uiState.value.copy(error = null)
+        }
+    }
+
+    private fun continueAsGuest() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isGuest = true, error = null)
+            _uiEffect.emit(AuthUiEffect.NavigateToHome)
         }
     }
 
@@ -69,6 +77,7 @@ class AuthViewModel(
     private fun signOut() {
         viewModelScope.launch {
             signOutUseCase()
+            _uiState.value = _uiState.value.copy(isGuest = false)
             _uiEffect.emit(AuthUiEffect.NavigateToLogin)
         }
     }

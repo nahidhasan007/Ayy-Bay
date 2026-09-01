@@ -8,8 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Cake
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.MonitorWeight
@@ -24,8 +26,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
 import com.ayybay.app.presentation.language.tr
+import com.ayybay.app.ui.theme.AlarmPurple
 import com.ayybay.app.ui.theme.BalanceOrange
 import com.ayybay.app.ui.theme.ExpenseRed
 import com.ayybay.app.ui.theme.IncomeGreen
@@ -51,10 +55,14 @@ fun MoreScreen(
     onNavigateAgeCalculator: () -> Unit,
     onNavigateBmiCalculator: () -> Unit,
     onNavigateFitnessAdvice: () -> Unit,
-    onNavigateWebsites: () -> Unit
+    onNavigateWebsites: () -> Unit,
+    onNavigatePhoneBook: () -> Unit,
+    onNavigateAlarms: () -> Unit
 ) {
     val items = listOf(
         MoreItem("Notes", "নোট", "Personal notes and reminders", "ব্যক্তিগত নোট ও রিমাইন্ডার", Icons.Default.Description, IslamicGreen, onNavigateNotes),
+        MoreItem("Phone Book", "ফোন বুক", "Browse contacts and call them", "যোগাযোগ দেখুন ও কল করুন", Icons.Default.Contacts, InfoBlue, onNavigatePhoneBook),
+        MoreItem("Alarms", "অ্যালার্ম", "Set alarms and reminders", "অ্যালার্ম ও রিমাইন্ডার সেট করুন", Icons.Default.Alarm, AlarmPurple, onNavigateAlarms),
         MoreItem("Salah Tracker", "নামাজ ট্র্যাকার", "Track daily prayers and weekly progress", "দৈনিক নামাজ ও সাপ্তাহিক অগ্রগতি ট্র্যাক করুন", Icons.Default.Mosque, IslamicGreen, onNavigateSalahTracker),
         MoreItem("Quran Progress", "কুরআন অগ্রগতি", "Track Quran reading completion", "কুরআন পড়ার অগ্রগতি ট্র্যাক করুন", Icons.AutoMirrored.Filled.MenuBook, IslamicGreen, onNavigateQuranProgress),
         MoreItem("Age Calculator", "বয়স ক্যালকুলেটর", "Calculate your exact age", "আপনার সঠিক বয়স হিসাব করুন", Icons.Default.Cake, IncomeGreen, onNavigateAgeCalculator),
@@ -65,9 +73,17 @@ fun MoreScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = { Text(text = tr("More", "আরও"), fontWeight = FontWeight.Bold) },
-                actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
+                actions = {
+                    LanguageToggle(
+                        modifier = Modifier.padding(end = 12.dp),
+                        selectedColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                        borderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                        dividerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
+                }
             )
         }
     ) { paddingValues ->

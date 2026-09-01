@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ayybay.app.domain.model.DailyLink
 import com.ayybay.app.domain.model.LinkCategory
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.language.label
 import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.mvi.LinkUiState
@@ -34,7 +35,7 @@ fun LinkListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         linkCategory?.let {
@@ -57,7 +58,9 @@ fun LinkListScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = color,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }

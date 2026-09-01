@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.ayybay.app.data.local.JobSampleData
 import com.ayybay.app.domain.model.GovtJob
 import com.ayybay.app.domain.model.JobTag
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
 import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.ui.theme.ExpenseRed
@@ -71,7 +72,7 @@ fun JobsScreen() {
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Text(text = tr("Govt Jobs", "সরকারি চাকরি"), fontWeight = FontWeight.Bold)
                 },
@@ -83,10 +84,16 @@ fun JobsScreen() {
                         Icon(
                             imageVector = if (bookmarkedOnly) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                             contentDescription = tr("Bookmarked jobs", "বুকমার্ক করা চাকরি"),
-                            tint = if (bookmarkedOnly) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            tint = if (bookmarkedOnly) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onPrimary
                         )
                     }
-                    LanguageToggle(modifier = Modifier.padding(end = 12.dp))
+                    LanguageToggle(
+                        modifier = Modifier.padding(end = 12.dp),
+                        selectedColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                        borderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                        dividerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
                 }
             )
         }

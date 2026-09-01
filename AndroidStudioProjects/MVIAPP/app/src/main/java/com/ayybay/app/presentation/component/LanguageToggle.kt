@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,10 +25,18 @@ import org.koin.androidx.compose.koinViewModel
  * Bangla | EN pill toggle shown on every top-level screen. Switches the app-wide
  * [AppLanguage] via [LanguageViewModel]; every screen reading [com.ayybay.app.presentation.language.LocalAppLanguage]
  * (through [com.ayybay.app.presentation.language.tr]) updates immediately.
+ *
+ * Colors default to the on-surface palette (for use on a plain background, e.g.
+ * HomeScreen's header); pass the onPrimary-based overrides when placing this
+ * inside [AppTopBar]'s colored toolbar.
  */
 @Composable
 fun LanguageToggle(
     modifier: Modifier = Modifier,
+    selectedColor: Color = MaterialTheme.colorScheme.primary,
+    unselectedColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    borderColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+    dividerColor: Color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
     languageViewModel: LanguageViewModel = koinViewModel()
 ) {
     val language by languageViewModel.language.collectAsState()
@@ -36,21 +45,25 @@ fun LanguageToggle(
         modifier = modifier
             .height(32.dp)
             .clip(RoundedCornerShape(50))
-            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(50))
+            .border(1.dp, borderColor, RoundedCornerShape(50))
     ) {
         LanguageOption(
             label = "বাংলা",
             selected = language == AppLanguage.BN,
+            selectedColor = selectedColor,
+            unselectedColor = unselectedColor,
             onClick = { languageViewModel.setLanguage(AppLanguage.BN) }
         )
         Text(
             text = "|",
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+            color = dividerColor,
             modifier = Modifier.padding(vertical = 6.dp)
         )
         LanguageOption(
             label = "EN",
             selected = language == AppLanguage.EN,
+            selectedColor = selectedColor,
+            unselectedColor = unselectedColor,
             onClick = { languageViewModel.setLanguage(AppLanguage.EN) }
         )
     }
@@ -60,13 +73,15 @@ fun LanguageToggle(
 private fun LanguageOption(
     label: String,
     selected: Boolean,
+    selectedColor: Color,
+    unselectedColor: Color,
     onClick: () -> Unit
 ) {
     Text(
         text = label,
         fontSize = 13.sp,
         fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        color = if (selected) selectedColor else unselectedColor,
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)

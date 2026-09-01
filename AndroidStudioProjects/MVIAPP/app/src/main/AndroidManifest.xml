@@ -28,6 +28,12 @@
     <!-- Optional: Request to ignore battery optimizations (user approval needed) -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!-- Phone Book: read contacts to call them (calling itself is done via ACTION_DIAL, no CALL_PHONE needed) -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <!-- Alarms: show the full-screen ringing UI over the lock screen -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
     <application
         android:name=".AyyBayApplication"
         android:allowBackup="true"
@@ -77,6 +83,42 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Alarm Boot Receiver - Reschedules user alarms after device restart -->
+        <receiver
+            android:name=".receiver.AlarmBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Alarm Receiver - Triggered by AlarmManager when a user alarm fires -->
+        <receiver
+            android:name=".receiver.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Alarm Ringing Service - Plays the alarm sound/vibration until stopped or snoozed -->
+        <service
+            android:name=".service.AlarmRingingService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Full-screen alarm ring UI, shown over the lock screen -->
+        <activity
+            android:name=".alarm.AlarmRingActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.MVIAPP" />
 
     </application>
 

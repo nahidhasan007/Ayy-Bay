@@ -9,7 +9,8 @@ fun SignUpScreen(
     error: String?,
     onGoogleSignUp: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onDismissError: () -> Unit
+    onDismissError: () -> Unit,
+    onContinueAsGuest: () -> Unit
 ) {
     AuthScaffold(
         title = tr("Create your account", "আপনার অ্যাকাউন্ট তৈরি করুন"),
@@ -32,6 +33,7 @@ fun SignUpScreen(
                 actionText = tr("Log in", "লগ ইন করুন"),
                 onClick = onNavigateToLogin
             )
-        }
+        },
+        onContinueAsGuest = onContinueAsGuest
     )
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
 import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.util.calculateAge
@@ -38,14 +39,22 @@ fun AgeCalculatorScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = { Text(text = "🎂  " + tr("Age Calculator", "বয়স ক্যালকুলেটর"), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
-                actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
+                actions = {
+                    LanguageToggle(
+                        modifier = Modifier.padding(end = 12.dp),
+                        selectedColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                        borderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                        dividerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
+                }
             )
         }
     ) { paddingValues ->

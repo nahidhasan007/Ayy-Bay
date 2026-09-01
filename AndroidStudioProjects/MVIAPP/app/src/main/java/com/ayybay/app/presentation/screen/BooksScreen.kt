@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ayybay.app.data.local.BookSampleData
 import com.ayybay.app.domain.model.ReligionCategory
+import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
 import com.ayybay.app.presentation.language.tr
 
@@ -28,11 +29,19 @@ fun BooksScreen(onCategoryClick: (String) -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            AppTopBar(
                 title = {
                     Text(text = tr("Religious Books", "ধর্মীয় গ্রন্থ"), fontWeight = FontWeight.Bold)
                 },
-                actions = { LanguageToggle(modifier = Modifier.padding(end = 12.dp)) }
+                actions = {
+                    LanguageToggle(
+                        modifier = Modifier.padding(end = 12.dp),
+                        selectedColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+                        borderColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
+                        dividerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+                    )
+                }
             )
         }
     ) { paddingValues ->
