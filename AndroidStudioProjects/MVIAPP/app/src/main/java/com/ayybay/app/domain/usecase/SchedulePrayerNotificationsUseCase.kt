@@ -44,15 +44,19 @@ class SchedulePrayerNotificationsUseCase(
         val todayKey = Date(today.startOfDayMillis())
         prayerTimeDao.insertPrayerTimes(todayPrayers.map { PrayerTimeMapper.toEntity(it, todayKey) })
 
-        // Schedule the next occurrence of each prayer (today if not passed, otherwise tomorrow)
+        // Schedule (or cancel) the next occurrence of each prayer based on the persisted
+        // per-prayer enabled flag in settings -- previously this read isEnabled off the
+        // freshly-calculated PrayerTime, which always defaults to true, so disabling a
+        // prayer never actually stopped its alarm from firing.
         PrayerName.values().forEach { prayerName ->
             val todayPrayer = todayPrayers.find { it.prayerName == prayerName } ?: return@forEach
             val nextPrayer = if (todayPrayer.time.after(now)) todayPrayer
             else tomorrowPrayers.find { it.prayerName == prayerName } ?: return@forEach
 
-            val enabled = todayPrayer.isEnabled
-            if (enabled) {
+            if (settings.isPrayerEnabled(prayerName)) {
                 prayerTimeRepository.schedulePrayerNotification(nextPrayer)
+            } else {
+                prayerTimeRepository.cancelPrayerNotification(prayerName)
             }
         }
     }

@@ -22,8 +22,10 @@ import com.ayybay.app.presentation.navigation.AppNavigation
 import com.ayybay.app.presentation.viewmodel.AlarmViewModel
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.HealthViewModel
+import com.ayybay.app.presentation.viewmodel.JobsViewModel
 import com.ayybay.app.presentation.viewmodel.LanguageViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
+import com.ayybay.app.presentation.viewmodel.NotificationViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
@@ -44,6 +46,8 @@ class MainActivity : ComponentActivity() {
     private val healthViewModel: HealthViewModel by viewModel()
     private val alarmViewModel: AlarmViewModel by viewModel()
     private val phoneBookViewModel: PhoneBookViewModel by viewModel()
+    private val jobsViewModel: JobsViewModel by viewModel()
+    private val notificationViewModel: NotificationViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +70,9 @@ class MainActivity : ComponentActivity() {
                             trackerViewModel = trackerViewModel,
                             healthViewModel = healthViewModel,
                             alarmViewModel = alarmViewModel,
-                            phoneBookViewModel = phoneBookViewModel
+                            phoneBookViewModel = phoneBookViewModel,
+                            jobsViewModel = jobsViewModel,
+                            notificationViewModel = notificationViewModel
                         )
                     }
                 }

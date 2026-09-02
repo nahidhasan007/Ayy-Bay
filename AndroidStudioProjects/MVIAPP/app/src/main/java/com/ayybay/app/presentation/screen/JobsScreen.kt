@@ -28,11 +28,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ayybay.app.data.local.JobSampleData
 import com.ayybay.app.domain.model.GovtJob
 import com.ayybay.app.domain.model.JobTag
 import com.ayybay.app.presentation.component.AppTopBar
 import com.ayybay.app.presentation.component.LanguageToggle
+import com.ayybay.app.presentation.mvi.JobUiIntent
+import com.ayybay.app.presentation.mvi.JobUiState
 import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.ui.theme.ExpenseRed
 import com.ayybay.app.ui.theme.IncomeGreenTint
@@ -50,21 +51,16 @@ private val jobFilters = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun JobsScreen() {
+fun JobsScreen(
+    uiState: JobUiState,
+    onIntent: (JobUiIntent) -> Unit
+) {
     val context = LocalContext.current
-    val jobs = remember { JobSampleData.getSampleJobs() }
-    var selectedFilter by remember { mutableStateOf(jobFilters.first()) }
-    var searchQuery by remember { mutableStateOf("") }
     var searchActive by remember { mutableStateOf(false) }
-    var bookmarkedOnly by remember { mutableStateOf(false) }
-    var bookmarked by remember { mutableStateOf(setOf<Long>()) }
 
-    val featured = jobs.firstOrNull { it.isFeatured }
-    val filteredJobs = jobs.filter { job ->
-        (selectedFilter.tag == null || job.tags.contains(selectedFilter.tag)) &&
-            (!bookmarkedOnly || bookmarked.contains(job.id)) &&
-            (searchQuery.isBlank() || job.title.contains(searchQuery, ignoreCase = true) || job.organization.contains(searchQuery, ignoreCase = true))
-    }
+    val featured = uiState.featured
+    val filteredJobs = uiState.visibleJobs
+    val showFeatured = featured != null && uiState.selectedTag == null && !uiState.bookmarkedOnly && uiState.searchQuery.isBlank()
 
     fun openUrl(url: String) {
         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
@@ -80,11 +76,11 @@ fun JobsScreen() {
                     IconButton(onClick = { searchActive = !searchActive }) {
                         Icon(Icons.Default.Search, contentDescription = tr("Search", "খুঁজুন"))
                     }
-                    IconButton(onClick = { bookmarkedOnly = !bookmarkedOnly }) {
+                    IconButton(onClick = { onIntent(JobUiIntent.ToggleBookmarkedOnly) }) {
                         Icon(
-                            imageVector = if (bookmarkedOnly) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                            imageVector = if (uiState.bookmarkedOnly) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                             contentDescription = tr("Bookmarked jobs", "বুকমার্ক করা চাকরি"),
-                            tint = if (bookmarkedOnly) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onPrimary
+                            tint = if (uiState.bookmarkedOnly) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     LanguageToggle(
@@ -108,8 +104,8 @@ fun JobsScreen() {
             if (searchActive) {
                 item {
                     OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
+                        value = uiState.searchQuery,
+                        onValueChange = { onIntent(JobUiIntent.Search(it)) },
                         modifier = Modifier.fillMaxWidth(),
                         placeholder = { Text(tr("Search jobs or organizations…", "চাকরি বা প্রতিষ্ঠান খুঁজুন…")) },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
@@ -119,9 +115,11 @@ fun JobsScreen() {
                 }
             }
 
-            if (featured != null && selectedFilter.tag == null && !bookmarkedOnly && searchQuery.isBlank()) {
-                item {
-                    FeaturedJobCard(job = featured, onViewCircular = { openUrl(featured.websiteUrl) })
+            if (showFeatured) {
+                featured?.let { job ->
+                    item {
+                        FeaturedJobCard(job = job, onViewCircular = { openUrl(job.websiteUrl) })
+                    }
                 }
             }
 
@@ -129,8 +127,8 @@ fun JobsScreen() {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(jobFilters) { filter ->
                         FilterChip(
-                            selected = selectedFilter == filter,
-                            onClick = { selectedFilter = filter },
+                            selected = uiState.selectedTag == filter.tag,
+                            onClick = { onIntent(JobUiIntent.SelectTag(filter.tag)) },
                             label = { Text(tr(filter.labelEn, filter.labelBn)) }
                         )
                     }
@@ -147,10 +145,8 @@ fun JobsScreen() {
                 items(filteredJobs, key = { it.id }) { job ->
                     JobCard(
                         job = job,
-                        isBookmarked = bookmarked.contains(job.id),
-                        onToggleBookmark = {
-                            bookmarked = if (bookmarked.contains(job.id)) bookmarked - job.id else bookmarked + job.id
-                        },
+                        isBookmarked = uiState.bookmarkedIds.contains(job.id),
+                        onToggleBookmark = { onIntent(JobUiIntent.ToggleBookmark(job.id)) },
                         onOpenWebsite = { openUrl(job.websiteUrl) }
                     )
                 }
@@ -172,11 +168,11 @@ private fun FeaturedJobCard(job: GovtJob, onViewCircular: () -> Unit) {
                     JobLogo(job.logoEmoji, size = 48.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Text(text = job.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(text = tr(job.title, job.titleBn), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Work, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = job.organization, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = tr(job.organization, job.organizationBn), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -241,8 +237,8 @@ private fun JobCard(
                 JobLogo(job.logoEmoji, size = 44.dp)
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = job.organization, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text(text = job.title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = tr(job.organization, job.organizationBn), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(text = tr(job.title, job.titleBn), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(6.dp))
                     Row {
                         Text(text = "${tr("Published", "প্রকাশিত")}: ${job.publishedDate}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

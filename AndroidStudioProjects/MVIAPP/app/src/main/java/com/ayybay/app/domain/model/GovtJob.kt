@@ -5,6 +5,7 @@ data class GovtJob(
     val organization: String,
     val organizationBn: String,
     val title: String,
+    val titleBn: String = title,
     val logoEmoji: String,
     val publishedDate: String,
     val deadline: String,

@@ -11,12 +11,12 @@ import com.ayybay.app.domain.model.PrayerSettings
 import com.ayybay.app.domain.model.PrayerTime
 import com.ayybay.app.domain.repository.PrayerTimeRepository
 import com.ayybay.app.receiver.AzanNotificationReceiver
+import com.ayybay.app.util.RequestCodes
 import com.ayybay.app.util.startOfDayMillis
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import java.util.Calendar
 import java.util.Date
-import kotlin.jvm.java
 
 class PrayerTimeRepositoryImpl(
     private val prayerTimeDao: PrayerTimeDao,
@@ -40,7 +40,13 @@ class PrayerTimeRepositoryImpl(
     }
 
     override suspend fun togglePrayerNotification(prayerName: PrayerName, enabled: Boolean) {
-        prayerTimeDao.togglePrayerNotification(prayerName.name, Date().startOfDayMillis(), enabled)
+        // Per-prayer enabled flags live on the settings singleton, not the daily
+        // prayer_times row -- the latter is recomputed (and its isEnabled reset to the
+        // PrayerTime default of true) every time SchedulePrayerNotificationsUseCase runs,
+        // which made this toggle silently forget itself by the next day.
+        val current = PrayerTimeMapper.toDomainSettings(prayerTimeDao.getPrayerSettings().first())
+        val updated = current.withPrayerEnabled(prayerName, enabled)
+        prayerTimeDao.insertPrayerSettings(PrayerTimeMapper.toEntity(updated))
     }
 
     override suspend fun schedulePrayerNotification(prayerTime: PrayerTime) {
@@ -55,7 +61,7 @@ class PrayerTimeRepositoryImpl(
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            prayerTime.prayerName.ordinal,
+            RequestCodes.forPrayer(prayerTime.prayerName.ordinal),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -92,7 +98,7 @@ class PrayerTimeRepositoryImpl(
 
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            prayerName.ordinal,
+            RequestCodes.forPrayer(prayerName.ordinal),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
         )

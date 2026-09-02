@@ -8,6 +8,8 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ayybay.app.data.local.entity.AlarmEntity
+import com.ayybay.app.data.local.entity.AppNotificationEntity
+import com.ayybay.app.data.local.entity.JobBookmarkEntity
 import com.ayybay.app.data.local.entity.LinkEntity
 import com.ayybay.app.data.local.entity.NoteEntity
 import com.ayybay.app.data.local.entity.PrayerLogEntity
@@ -26,10 +28,12 @@ import com.ayybay.app.data.local.entity.SurahProgressEntity
         PrayerLogEntity::class,
         SurahProgressEntity::class,
         QuranReadDayEntity::class,
-        AlarmEntity::class
+        AlarmEntity::class,
+        JobBookmarkEntity::class,
+        AppNotificationEntity::class
     ],
-    version = 7,
-    exportSchema = false
+    version = 8,
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -41,6 +45,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun prayerLogDao(): PrayerLogDao
     abstract fun quranProgressDao(): QuranProgressDao
     abstract fun alarmDao(): AlarmDao
+    abstract fun jobBookmarkDao(): JobBookmarkDao
+    abstract fun appNotificationDao(): AppNotificationDao
 
     companion object {
         private const val DATABASE_NAME = "ayybay_database"
@@ -155,6 +161,47 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Per-prayer notification enabled flags move from the daily prayer_times
+                // row (recomputed -- and its isEnabled reset to true -- every time
+                // SchedulePrayerNotificationsUseCase runs) onto the singleton
+                // prayer_settings row, which is the only place they actually persist.
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `fajrEnabled` INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `dhuhrEnabled` INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `asrEnabled` INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `maghribEnabled` INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `ishaEnabled` INTEGER NOT NULL DEFAULT 1")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `placeName` TEXT")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `autoLocationEnabled` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE `prayer_settings` ADD COLUMN `hijriOffset` INTEGER NOT NULL DEFAULT 0")
+
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `job_bookmarks` (
+                        `jobId` INTEGER PRIMARY KEY NOT NULL,
+                        `bookmarkedAt` INTEGER NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `app_notifications` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `type` TEXT NOT NULL,
+                        `titleEn` TEXT NOT NULL,
+                        `titleBn` TEXT NOT NULL,
+                        `bodyEn` TEXT NOT NULL,
+                        `bodyBn` TEXT NOT NULL,
+                        `timestamp` INTEGER NOT NULL,
+                        `isRead` INTEGER NOT NULL DEFAULT 0,
+                        `deepLinkRoute` TEXT
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -162,7 +209,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     .build()
                 INSTANCE = instance
                 instance

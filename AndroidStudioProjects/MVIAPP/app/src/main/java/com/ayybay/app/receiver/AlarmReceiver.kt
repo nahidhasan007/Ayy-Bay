@@ -12,8 +12,11 @@ import com.ayybay.app.alarm.AlarmRingActions
 import com.ayybay.app.alarm.AlarmRingActivity
 import com.ayybay.app.data.repository.AlarmRepositoryImpl.Companion.EXTRA_ALARM_ID
 import com.ayybay.app.domain.model.Alarm
+import com.ayybay.app.domain.model.AppNotification
 import com.ayybay.app.domain.repository.AlarmRepository
+import com.ayybay.app.domain.usecase.AddNotificationUseCase
 import com.ayybay.app.service.AlarmRingingService
+import com.ayybay.app.util.RequestCodes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,6 +28,7 @@ class AlarmReceiver : BroadcastReceiver(), KoinComponent {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val alarmRepository: AlarmRepository by inject()
+    private val addNotificationUseCase: AddNotificationUseCase by inject()
 
     companion object {
         const val NOTIFICATION_ID = 3001
@@ -49,6 +53,18 @@ class AlarmReceiver : BroadcastReceiver(), KoinComponent {
                         }
                     }
                     ring(context, alarm)
+                    val timeText = "%02d:%02d".format(alarm.hour, alarm.minute)
+                    addNotificationUseCase(
+                        AppNotification(
+                            type = "alarm",
+                            titleEn = alarm.label.ifBlank { "Alarm" },
+                            titleBn = alarm.label.ifBlank { "অ্যালার্ম" },
+                            bodyEn = timeText,
+                            bodyBn = timeText,
+                            timestamp = System.currentTimeMillis(),
+                            deepLinkRoute = "alarms"
+                        )
+                    )
                 }
             } finally {
                 pendingResult.finish()
@@ -70,7 +86,7 @@ class AlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
             context,
-            alarm.id.toInt(),
+            RequestCodes.forUserAlarm(alarm.id),
             fullScreenIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )

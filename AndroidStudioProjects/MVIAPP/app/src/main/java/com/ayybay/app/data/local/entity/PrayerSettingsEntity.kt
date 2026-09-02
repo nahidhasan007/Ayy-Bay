@@ -9,7 +9,15 @@ data class PrayerSettingsEntity(
     val id: Int = 1,
     val locationLatitude: Double?,
     val locationLongitude: Double?,
+    val placeName: String? = null,
+    val autoLocationEnabled: Boolean = false,
     val calculationMethod: String,
     val madhab: String,
-    val notificationsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true,
+    val fajrEnabled: Boolean = true,
+    val dhuhrEnabled: Boolean = true,
+    val asrEnabled: Boolean = true,
+    val maghribEnabled: Boolean = true,
+    val ishaEnabled: Boolean = true,
+    val hijriOffset: Int = 0
 )

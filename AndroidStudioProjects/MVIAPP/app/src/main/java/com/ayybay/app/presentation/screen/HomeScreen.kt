@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ import com.ayybay.app.presentation.util.formatCountdown
 import com.ayybay.app.presentation.util.formatTaka
 import com.ayybay.app.presentation.util.nextPrayerOf
 import com.ayybay.app.presentation.util.rememberTickingNow
+import com.ayybay.app.service.AdhanForegroundService
 import com.ayybay.app.ui.theme.BalanceOrange
 import com.ayybay.app.ui.theme.BalanceOrangeTint
 import com.ayybay.app.ui.theme.ExpenseRed
@@ -70,6 +72,8 @@ fun HomeScreen(
     userEmail: String? = null,
     prayerTimes: List<PrayerTime> = emptyList(),
     onTogglePrayerNotification: (PrayerName, Boolean) -> Unit = { _, _ -> },
+    unreadNotificationCount: Int = 0,
+    onNavigateNotifications: () -> Unit = {},
     onNavigatePrayerTimes: () -> Unit = {},
     onNavigateFinance: () -> Unit = {},
     onNavigateJobs: () -> Unit = {},
@@ -93,6 +97,8 @@ fun HomeScreen(
                 HomeHeader(
                     userName = userName,
                     userEmail = userEmail,
+                    unreadNotificationCount = unreadNotificationCount,
+                    onNavigateNotifications = onNavigateNotifications,
                     onNavigateProfile = onNavigateProfile,
                     onSignOut = onSignOut
                 )
@@ -127,6 +133,8 @@ fun HomeScreen(
 private fun HomeHeader(
     userName: String,
     userEmail: String?,
+    unreadNotificationCount: Int,
+    onNavigateNotifications: () -> Unit,
     onNavigateProfile: () -> Unit,
     onSignOut: () -> Unit
 ) {
@@ -166,21 +174,23 @@ private fun HomeHeader(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box {
-                IconButton(onClick = { }) {
+                IconButton(onClick = onNavigateNotifications) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
                         contentDescription = tr("Notifications", "নোটিফিকেশন"),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .align(Alignment.TopEnd)
-                        .offset(x = (-8).dp, y = 8.dp)
-                        .clip(CircleShape)
-                        .background(ExpenseRed)
-                )
+                if (unreadNotificationCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-8).dp, y = 8.dp)
+                            .clip(CircleShape)
+                            .background(ExpenseRed)
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(4.dp))
             LanguageToggle()
@@ -264,6 +274,7 @@ private fun NextPrayerCard(
     onToggleNotification: (PrayerName, Boolean) -> Unit,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
     val now by rememberTickingNow()
     val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
     val sortedPrayers = remember(prayerTimes) { prayerTimes.sortedBy { it.prayerName.ordinal } }
@@ -301,7 +312,12 @@ private fun NextPrayerCard(
                     imageVector = Icons.AutoMirrored.Filled.VolumeUp,
                     contentDescription = tr("Play Adhan", "আজান বাজান"),
                     tint = Color.White,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clickable {
+                            val label = nextPrayer?.first?.prayerName?.displayName ?: "Prayer"
+                            AdhanForegroundService.startAdhan(context, label, 90)
+                        }
                 )
             }
 

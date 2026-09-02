@@ -15,5 +15,7 @@ data class Book(
     val id: Long,
     val title: String,
     val titleBn: String,
-    val author: String = ""
+    val author: String = "",
+    /** External reference URL, opened in-app via WebView. Null means no content is wired up yet. */
+    val url: String? = null
 )

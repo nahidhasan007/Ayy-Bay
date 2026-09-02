@@ -5,13 +5,16 @@ import com.ayybay.app.AyyBayViewModel
 import com.ayybay.app.R
 import com.ayybay.app.data.PrayerTimeCalculator
 import com.ayybay.app.data.local.AppDatabase
+import com.ayybay.app.data.location.LocationProvider
 import com.ayybay.app.data.local.AuthPreferences
 import com.ayybay.app.data.local.HealthPreferences
 import com.ayybay.app.data.local.LanguagePreferences
 import com.ayybay.app.data.repository.AlarmRepositoryImpl
 import com.ayybay.app.data.repository.AuthRepositoryImpl
 import com.ayybay.app.data.repository.ContactRepositoryImpl
+import com.ayybay.app.data.repository.JobBookmarkRepositoryImpl
 import com.ayybay.app.data.repository.LinkRepositoryImpl
+import com.ayybay.app.data.repository.NotificationRepositoryImpl
 import com.ayybay.app.data.repository.NoteRepositoryImpl
 import com.ayybay.app.data.repository.PrayerLogRepositoryImpl
 import com.ayybay.app.data.repository.QuranProgressRepositoryImpl
@@ -20,7 +23,9 @@ import com.ayybay.app.data.repository.PrayerTimeRepositoryImpl
 import com.ayybay.app.domain.repository.AlarmRepository
 import com.ayybay.app.domain.repository.AuthRepository
 import com.ayybay.app.domain.repository.ContactRepository
+import com.ayybay.app.domain.repository.JobBookmarkRepository
 import com.ayybay.app.domain.repository.LinkRepository
+import com.ayybay.app.domain.repository.NotificationRepository
 import com.ayybay.app.domain.repository.NoteRepository
 import com.ayybay.app.domain.repository.PrayerLogRepository
 import com.ayybay.app.domain.repository.QuranProgressRepository
@@ -30,8 +35,10 @@ import com.ayybay.app.domain.usecase.*
 import com.ayybay.app.presentation.viewmodel.AlarmViewModel
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.HealthViewModel
+import com.ayybay.app.presentation.viewmodel.JobsViewModel
 import com.ayybay.app.presentation.viewmodel.LanguageViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
+import com.ayybay.app.presentation.viewmodel.NotificationViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
@@ -52,9 +59,14 @@ val appModule = module {
     single { get<AppDatabase>().prayerLogDao() }
     single { get<AppDatabase>().quranProgressDao() }
     single { get<AppDatabase>().alarmDao() }
+    single { get<AppDatabase>().jobBookmarkDao() }
+    single { get<AppDatabase>().appNotificationDao() }
 
     // Prayer Calculator
     single { PrayerTimeCalculator() }
+
+    // Location (prayer times, Qibla)
+    single { LocationProvider(androidContext()) }
 
     // Repositories
     single<TransactionRepository> { TransactionRepositoryImpl(get()) }
@@ -70,6 +82,8 @@ val appModule = module {
     single<QuranProgressRepository> { QuranProgressRepositoryImpl(get()) }
     single<AlarmRepository> { AlarmRepositoryImpl(alarmDao = get(), context = androidContext()) }
     single<ContactRepository> { ContactRepositoryImpl(androidContext()) }
+    single<JobBookmarkRepository> { JobBookmarkRepositoryImpl(get()) }
+    single<NotificationRepository> { NotificationRepositoryImpl(get()) }
 
     // Auth
     single { AuthPreferences(androidContext()) }
@@ -139,6 +153,17 @@ val appModule = module {
     // Use Cases - Phone Book
     factory { GetContactsUseCase(get()) }
 
+    // Use Cases - Jobs
+    factory { GetBookmarkedJobIdsUseCase(get()) }
+    factory { ToggleJobBookmarkUseCase(get()) }
+
+    // Use Cases - Notifications
+    factory { GetNotificationsUseCase(get()) }
+    factory { GetUnreadNotificationCountUseCase(get()) }
+    factory { MarkNotificationReadUseCase(get()) }
+    factory { MarkAllNotificationsReadUseCase(get()) }
+    factory { AddNotificationUseCase(get()) }
+
     // ViewModels
     viewModel {
         TransactionViewModel(
@@ -156,7 +181,8 @@ val appModule = module {
             getPrayerSettingsUseCase = get(),
             updatePrayerSettingsUseCase = get(),
             togglePrayerNotificationUseCase = get(),
-            schedulePrayerNotificationsUseCase = get()
+            schedulePrayerNotificationsUseCase = get(),
+            locationProvider = get()
         )
     }
 
@@ -220,6 +246,22 @@ val appModule = module {
     }
 
     viewModel { PhoneBookViewModel(getContactsUseCase = get()) }
+
+    viewModel {
+        JobsViewModel(
+            getBookmarkedJobIdsUseCase = get(),
+            toggleJobBookmarkUseCase = get()
+        )
+    }
+
+    viewModel {
+        NotificationViewModel(
+            getNotificationsUseCase = get(),
+            getUnreadNotificationCountUseCase = get(),
+            markNotificationReadUseCase = get(),
+            markAllNotificationsReadUseCase = get()
+        )
+    }
 }
 
 fun provideAppDatabase(context: Context): AppDatabase {

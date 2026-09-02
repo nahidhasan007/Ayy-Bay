@@ -38,6 +38,30 @@ class PrayerTimeCalculator {
         )
     }
 
+    /**
+     * Sunrise for [date] at the given location/method -- not one of the five daily prayers,
+     * so it isn't in [calculatePrayerTimes]'s result, but Ramadan (Sehri cutoff) and Ishraq
+     * both need it.
+     */
+    fun calculateSunrise(
+        date: Date,
+        latitude: Double,
+        longitude: Double,
+        calculationMethod: CalculationMethod = CalculationMethod.KARACHI,
+        madhab: Madhab = Madhab.HANAFI
+    ): Date {
+        val coordinates = Coordinates(latitude, longitude)
+        val cal = Calendar.getInstance().apply { time = date }
+        val dateComponents = DateComponents(
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH) + 1,
+            cal.get(Calendar.DAY_OF_MONTH)
+        )
+        val params = toAdhanMethod(calculationMethod).parameters
+        params.madhab = toAdhanMadhab(madhab)
+        return PrayerTimes(coordinates, dateComponents, params).sunrise
+    }
+
     private fun toAdhanMethod(method: CalculationMethod): AdhanMethod = when (method) {
         CalculationMethod.KARACHI -> AdhanMethod.KARACHI
         CalculationMethod.ISNA -> AdhanMethod.NORTH_AMERICA

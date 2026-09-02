@@ -25,7 +25,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () -> Unit) {
+fun BookListScreen(
+    religionId: String,
+    onOpenQuran: () -> Unit = {},
+    onOpenBook: (bookId: Long) -> Unit = {},
+    onBack: () -> Unit
+) {
     val category = remember(religionId) { BookSampleData.getReligionCategories().find { it.id == religionId } }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -82,10 +87,10 @@ fun BookListScreen(religionId: String, onOpenQuran: () -> Unit = {}, onBack: () 
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            if (religionId == "islam" && book.id == 1L) {
-                                onOpenQuran()
-                            } else {
-                                scope.launch { snackbarHostState.showSnackbar("\"$localizedTitle\" $fullTextComingSoon") }
+                            when {
+                                religionId == "islam" && book.id == 1L -> onOpenQuran()
+                                book.url != null -> onOpenBook(book.id)
+                                else -> scope.launch { snackbarHostState.showSnackbar("\"$localizedTitle\" $fullTextComingSoon") }
                             }
                         },
                     shape = RoundedCornerShape(12.dp),

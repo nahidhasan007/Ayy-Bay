@@ -15,6 +15,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.ayybay.app.MainActivity
+import com.ayybay.app.util.RequestCodes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -197,7 +198,7 @@ class AdhanForegroundService : Service() {
         }
         val stopPendingIntent = PendingIntent.getService(
             this,
-            1,
+            RequestCodes.ADHAN_STOP_ACTION,
             stopIntent,
             PendingIntent.FLAG_IMMUTABLE
         )

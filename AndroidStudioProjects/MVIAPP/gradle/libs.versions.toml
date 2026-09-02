@@ -21,6 +21,10 @@ navigationFragment = "2.7.4"
 material = "1.11.0"
 credentials = "1.3.0"
 googleid = "1.1.1"
+playServicesLocation = "21.3.0"
+glance = "1.2.0"
+workManager = "2.11.2"
+desugarJdkLibs = "2.1.5"
 
 [libraries]
 adhan = { module = "com.batoulapps.adhan:adhan", version.ref = "adhan" }
@@ -73,6 +77,19 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 
 # DataStore
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+
+# Location (prayer times, Qibla)
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+
+# Home screen widget
+androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
+
+# Background work (nightly prayer recompute, budget checks, recurring transactions)
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+
+# Core library desugaring - java.time (Hijri calendar) on minSdk 24
+android-desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

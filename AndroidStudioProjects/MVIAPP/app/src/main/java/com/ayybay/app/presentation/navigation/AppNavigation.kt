@@ -25,6 +25,7 @@ import com.ayybay.app.presentation.mvi.AuthUiEffect
 import com.ayybay.app.presentation.mvi.AuthUiIntent
 import com.ayybay.app.presentation.mvi.LinkUiIntent
 import com.ayybay.app.presentation.mvi.NoteUiIntent
+import com.ayybay.app.presentation.mvi.NotificationUiIntent
 import com.ayybay.app.presentation.mvi.TrackerUiIntent
 import com.ayybay.app.presentation.mvi.TransactionUiIntent
 import com.ayybay.app.presentation.screen.AddAlarmScreen
@@ -45,6 +46,7 @@ import com.ayybay.app.presentation.screen.LinkWebViewScreen
 import com.ayybay.app.presentation.screen.LoginScreen
 import com.ayybay.app.presentation.screen.MoreScreen
 import com.ayybay.app.presentation.screen.NotesScreen
+import com.ayybay.app.presentation.screen.NotificationCenterScreen
 import com.ayybay.app.presentation.screen.PhoneBookScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
 import com.ayybay.app.presentation.screen.ProfileScreen
@@ -57,7 +59,9 @@ import com.ayybay.app.data.local.QuranSurahData
 import com.ayybay.app.presentation.viewmodel.AlarmViewModel
 import com.ayybay.app.presentation.viewmodel.AuthViewModel
 import com.ayybay.app.presentation.viewmodel.HealthViewModel
+import com.ayybay.app.presentation.viewmodel.JobsViewModel
 import com.ayybay.app.presentation.viewmodel.LinkViewModel
+import com.ayybay.app.presentation.viewmodel.NotificationViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
@@ -68,6 +72,7 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object SignUp : Screen("sign_up")
     object Home : Screen("home")
+    object Notifications : Screen("notifications")
     object Finance : Screen("finance")
     object AddTransaction : Screen("add_transaction?transactionId={transactionId}") {
         fun createRoute(transactionId: Long = -1L) = "add_transaction?transactionId=$transactionId"
@@ -77,6 +82,9 @@ sealed class Screen(val route: String) {
     object Books : Screen("books")
     object BookList : Screen("book_list/{religionId}") {
         fun createRoute(religionId: String) = "book_list/$religionId"
+    }
+    object BookWebView : Screen("book_webview/{bookId}") {
+        fun createRoute(bookId: Long) = "book_webview/$bookId"
     }
     object SurahList : Screen("surah_list")
     object SurahWebView : Screen("surah_webview/{surahNumber}") {
@@ -123,7 +131,9 @@ fun AppNavigation(
     trackerViewModel: TrackerViewModel,
     healthViewModel: HealthViewModel,
     alarmViewModel: AlarmViewModel,
-    phoneBookViewModel: PhoneBookViewModel
+    phoneBookViewModel: PhoneBookViewModel,
+    jobsViewModel: JobsViewModel,
+    notificationViewModel: NotificationViewModel
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
 
@@ -166,15 +176,29 @@ fun AppNavigation(
     val transactionUiState by transactionViewModel.uiState.collectAsState()
     val prayerTimes by prayerViewModel.prayerTimes.collectAsState()
     val prayerSettings by prayerViewModel.prayerSettings.collectAsState()
+    val prayerUiState by prayerViewModel.uiState.collectAsState()
     val noteUiState by noteViewModel.uiState.collectAsState()
     val trackerUiState by trackerViewModel.uiState.collectAsState()
     val healthUiState by healthViewModel.uiState.collectAsState()
     val alarmUiState by alarmViewModel.uiState.collectAsState()
     val phoneBookUiState by phoneBookViewModel.uiState.collectAsState()
+    val jobUiState by jobsViewModel.uiState.collectAsState()
+    val notificationUiState by notificationViewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         alarmViewModel.uiEffect.collect { effect ->
             if (effect is AlarmUiEffect.NavigateBack) navController.popBackStack()
+        }
+    }
+
+    // Prayer/Salah-tracker state is keyed off "today" computed once when each ViewModel is
+    // constructed; re-check every minute so a process left open across midnight rolls over
+    // instead of continuing to show yesterday's prayer times and tracker data.
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(60_000L)
+            prayerViewModel.refreshDay()
+            trackerViewModel.refreshDay()
         }
     }
 
@@ -240,6 +264,8 @@ fun AppNavigation(
                     onTogglePrayerNotification = { name, enabled ->
                         prayerViewModel.togglePrayerNotification(name, enabled)
                     },
+                    unreadNotificationCount = notificationUiState.unreadCount,
+                    onNavigateNotifications = { navController.navigate(Screen.Notifications.route) },
                     onNavigatePrayerTimes = { navController.navigate(Screen.PrayerTimes.route) },
                     onNavigateFinance = {
                         navController.navigate(Screen.Finance.route) {
@@ -274,6 +300,18 @@ fun AppNavigation(
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onNavigateProfile = { navController.navigate(Screen.Profile.route) },
                     onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
+                )
+            }
+
+            composable(Screen.Notifications.route) {
+                NotificationCenterScreen(
+                    notifications = notificationUiState.notifications,
+                    onNotificationClick = { notification ->
+                        notificationViewModel.handleIntent(NotificationUiIntent.MarkRead(notification.id))
+                        notification.deepLinkRoute?.let { route -> navController.navigate(route) }
+                    },
+                    onMarkAllRead = { notificationViewModel.handleIntent(NotificationUiIntent.MarkAllRead) },
+                    onBack = { navController.popBackStack() }
                 )
             }
 
@@ -324,16 +362,21 @@ fun AppNavigation(
                 PrayerTimesScreen(
                     prayerTimes = prayerTimes,
                     prayerSettings = prayerSettings,
+                    isLocating = prayerUiState.isLocating,
                     onTogglePrayerNotification = { name, enabled ->
                         prayerViewModel.togglePrayerNotification(name, enabled)
                     },
                     onUpdateSettings = { settings -> prayerViewModel.updatePrayerSettings(settings) },
+                    onDetectLocation = { prayerViewModel.detectLocation() },
+                    onSetManualLocation = { latitude, longitude, placeName ->
+                        prayerViewModel.setManualLocation(latitude, longitude, placeName)
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }
 
             composable(Screen.Jobs.route) {
-                JobsScreen()
+                JobsScreen(uiState = jobUiState, onIntent = jobsViewModel::handleIntent)
             }
 
             composable(Screen.Books.route) {
@@ -348,6 +391,23 @@ fun AppNavigation(
                 BookListScreen(
                     religionId = religionId,
                     onOpenQuran = { navController.navigate(Screen.SurahList.route) },
+                    onOpenBook = { bookId -> navController.navigate(Screen.BookWebView.createRoute(bookId)) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.BookWebView.route,
+                arguments = listOf(navArgument("bookId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val bookId = backStackEntry.arguments?.getLong("bookId") ?: return@composable
+                val book = com.ayybay.app.data.local.BookSampleData.getReligionCategories()
+                    .flatMap { it.books }
+                    .find { it.id == bookId } ?: return@composable
+                val url = book.url ?: return@composable
+                SurahWebViewScreen(
+                    url = url,
+                    title = tr(book.title, book.titleBn),
                     onBack = { navController.popBackStack() }
                 )
             }

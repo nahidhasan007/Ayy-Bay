@@ -16,6 +16,7 @@ import com.ayybay.app.domain.usecase.TogglePrayerLogUseCase
 import com.ayybay.app.presentation.mvi.TrackerUiIntent
 import com.ayybay.app.presentation.mvi.TrackerUiState
 import com.ayybay.app.util.startOfDayMillis
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,11 +37,15 @@ class TrackerViewModel(
     private val getQuranStreakUseCase: GetQuranStreakUseCase
 ) : ViewModel() {
 
-    private val todayKey = Date().startOfDayMillis()
-    private val weekStartKey = todayKey - 6 * DAY_MILLIS
+    private var todayKey = Date().startOfDayMillis()
+    private var weekStartKey = todayKey - 6 * DAY_MILLIS
 
     private val _uiState = MutableStateFlow(TrackerUiState(todayDateKey = todayKey))
     val uiState: StateFlow<TrackerUiState> = _uiState.asStateFlow()
+
+    private var todayLogsJob: Job? = null
+    private var weeklyProgressJob: Job? = null
+    private var quranWeeklyJob: Job? = null
 
     init {
         observeTodayPrayerLogs()
@@ -58,8 +63,28 @@ class TrackerViewModel(
         }
     }
 
+    /**
+     * Re-derives today/this-week's keys if the calendar day has rolled over since the last
+     * load (previously `todayKey`/`weekStartKey` were computed once at construction and never
+     * revisited, so a long-lived process kept showing yesterday's data past midnight). Safe to
+     * call often -- it's a no-op until the day changes.
+     */
+    fun refreshDay() {
+        val newKey = Date().startOfDayMillis()
+        if (newKey != todayKey) {
+            todayKey = newKey
+            weekStartKey = todayKey - 6 * DAY_MILLIS
+            _uiState.value = _uiState.value.copy(todayDateKey = todayKey)
+            observeTodayPrayerLogs()
+            observeWeeklyPrayerProgress()
+            observeQuranWeeklyReading()
+            refreshStreak()
+        }
+    }
+
     private fun observeTodayPrayerLogs() {
-        viewModelScope.launch {
+        todayLogsJob?.cancel()
+        todayLogsJob = viewModelScope.launch {
             getTodayPrayerLogUseCase(todayKey).catch { }.collect { logs ->
                 val map = PrayerName.entries.associateWith { name ->
                     logs.find { it.prayerName == name }?.isPrayed ?: false
@@ -70,7 +95,8 @@ class TrackerViewModel(
     }
 
     private fun observeWeeklyPrayerProgress() {
-        viewModelScope.launch {
+        weeklyProgressJob?.cancel()
+        weeklyProgressJob = viewModelScope.launch {
             getWeeklyPrayerProgressUseCase(weekStartKey).catch { }.collect { progress ->
                 _uiState.value = _uiState.value.copy(weeklyPrayerProgress = normalizePrayerWeek(progress))
             }
@@ -86,7 +112,8 @@ class TrackerViewModel(
     }
 
     private fun observeQuranWeeklyReading() {
-        viewModelScope.launch {
+        quranWeeklyJob?.cancel()
+        quranWeeklyJob = viewModelScope.launch {
             getQuranWeeklyReadingUseCase(weekStartKey).catch { }.collect { days ->
                 _uiState.value = _uiState.value.copy(quranWeeklyReading = normalizeReadWeek(days))
             }

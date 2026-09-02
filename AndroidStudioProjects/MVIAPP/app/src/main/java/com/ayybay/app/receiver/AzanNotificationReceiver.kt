@@ -1,6 +1,5 @@
 package com.ayybay.app.receiver
 
-import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -12,17 +11,40 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.ayybay.app.MainActivity
-import com.ayybay.app.data.PrayerTimeCalculator
-import com.ayybay.app.domain.model.CalculationMethod
-import com.ayybay.app.domain.model.Madhab
+import com.ayybay.app.data.local.LanguagePreferences
+import com.ayybay.app.domain.model.AppNotification
 import com.ayybay.app.domain.model.PrayerName
+import com.ayybay.app.domain.usecase.AddNotificationUseCase
+import com.ayybay.app.domain.usecase.SchedulePrayerNotificationsUseCase
+import com.ayybay.app.presentation.language.AppLanguage
+import com.ayybay.app.presentation.language.bnLabel
+import com.ayybay.app.presentation.language.trOf
 import com.ayybay.app.service.AdhanForegroundService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class AzanNotificationReceiver : BroadcastReceiver() {
+/**
+ * Fired by AlarmManager at each prayer's exact time. Plays the Adhan, posts a notification,
+ * and then re-syncs the FULL prayer schedule from the user's real settings (location,
+ * calculation method, madhab, per-prayer enabled flags) via [SchedulePrayerNotificationsUseCase]
+ * -- rather than recomputing just this one prayer from hardcoded Dhaka/Karachi/Hanafi, which is
+ * how the fired alarm used to silently drift from what the app displayed and from what the user
+ * had configured. This also makes the schedule self-healing: every prayer that fires re-syncs it.
+ */
+class AzanNotificationReceiver : BroadcastReceiver(), KoinComponent {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val schedulePrayerNotificationsUseCase: SchedulePrayerNotificationsUseCase by inject()
+    private val languagePreferences: LanguagePreferences by inject()
+    private val addNotificationUseCase: AddNotificationUseCase by inject()
 
     companion object {
         const val NOTIFICATION_ID = 1001
@@ -33,16 +55,24 @@ class AzanNotificationReceiver : BroadcastReceiver() {
         val prayerName = intent.getStringExtra("prayer_name") ?: "Prayer Time"
         val currentTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
 
-        createNotificationChannel(context)
-        showNotification(context, prayerName, currentTime)
-
         AdhanForegroundService.startAdhan(
             context = context,
             prayerName = prayerName,
             durationSeconds = 90
         )
 
-        rescheduleForNextDay(context, prayerName)
+        val pendingResult = goAsync()
+        scope.launch {
+            try {
+                val language = languagePreferences.language.first()
+                createNotificationChannel(context)
+                showNotification(context, prayerName, currentTime, language)
+                recordNotification(prayerName, currentTime)
+                schedulePrayerNotificationsUseCase()
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     private fun createNotificationChannel(context: Context) {
@@ -69,15 +99,22 @@ class AzanNotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun showNotification(context: Context, prayerName: String, time: String) {
+    private fun showNotification(context: Context, prayerName: String, time: String, language: AppLanguage) {
+        val prayerEnum = PrayerName.values().find {
+            it.displayName.equals(prayerName, ignoreCase = true) || it.name.equals(prayerName, ignoreCase = true)
+        }
+        val localizedPrayerName = prayerEnum?.let { trOf(language, it.displayName, it.bnLabel()) } ?: prayerName
+
         val notificationIntent = Intent(context, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             context, 0, notificationIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+        val title = trOf(language, "🕌 $localizedPrayerName Time", "🕌 $localizedPrayerName এর সময়")
+        val body = trOf(language, "Adhan playing at $time", "আজান বাজছে $time এ")
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("🕌 $prayerName Time")
-            .setContentText("Adhan playing at $time")
+            .setContentTitle(title)
+            .setContentText(body)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -91,54 +128,23 @@ class AzanNotificationReceiver : BroadcastReceiver() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun rescheduleForNextDay(context: Context, prayerName: String) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-
-        // Match displayName or name to find the PrayerName enum
-        val prayerNameEnum = PrayerName.values().find {
-            it.displayName.equals(prayerName, ignoreCase = true) ||
-                it.name.equals(prayerName, ignoreCase = true)
-        } ?: return
-
-        // Calculate tomorrow's actual prayer time
-        val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }
-        val tomorrowPrayer = try {
-            PrayerTimeCalculator().calculatePrayerTimes(
-                date = tomorrow.time,
-                latitude = 23.8103,
-                longitude = 90.4125,
-                calculationMethod = CalculationMethod.KARACHI,
-                madhab = Madhab.HANAFI
-            ).find { it.prayerName == prayerNameEnum }
-        } catch (e: Exception) {
-            null
-        } ?: return
-
-        val intent = Intent(context, AzanNotificationReceiver::class.java).apply {
-            putExtra("prayer_name", prayerName)
-            putExtra("prayer_time", tomorrowPrayer.time.time)
-            action = "com.ayybay.app.AZAN_NOTIFICATION"
+    /** Persists a bilingual record for the in-app notification center (independent of the system notification above, which resolves to a single language at post time). */
+    private suspend fun recordNotification(prayerName: String, time: String) {
+        val prayerEnum = PrayerName.values().find {
+            it.displayName.equals(prayerName, ignoreCase = true) || it.name.equals(prayerName, ignoreCase = true)
         }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            prayerNameEnum.ordinal,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        val nameEn = prayerEnum?.displayName ?: prayerName
+        val nameBn = prayerEnum?.bnLabel() ?: prayerName
+        addNotificationUseCase(
+            AppNotification(
+                type = "adhan",
+                titleEn = "🕌 $nameEn Time",
+                titleBn = "🕌 $nameBn এর সময়",
+                bodyEn = "Adhan played at $time",
+                bodyBn = "আজান বাজানো হয়েছে $time এ",
+                timestamp = System.currentTimeMillis(),
+                deepLinkRoute = "prayer_times"
+            )
         )
-
-        try {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                tomorrowPrayer.time.time,
-                pendingIntent
-            )
-        } catch (e: SecurityException) {
-            alarmManager.setAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                tomorrowPrayer.time.time,
-                pendingIntent
-            )
-        }
     }
 }

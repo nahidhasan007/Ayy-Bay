@@ -32,9 +32,17 @@ object PrayerTimeMapper {
         return PrayerSettingsEntity(
             locationLatitude = settings.locationLatitude,
             locationLongitude = settings.locationLongitude,
+            placeName = settings.placeName,
+            autoLocationEnabled = settings.autoLocationEnabled,
             calculationMethod = settings.calculationMethod.name,
             madhab = settings.madhab.name,
-            notificationsEnabled = settings.notificationsEnabled
+            notificationsEnabled = settings.notificationsEnabled,
+            fajrEnabled = settings.fajrEnabled,
+            dhuhrEnabled = settings.dhuhrEnabled,
+            asrEnabled = settings.asrEnabled,
+            maghribEnabled = settings.maghribEnabled,
+            ishaEnabled = settings.ishaEnabled,
+            hijriOffset = settings.hijriOffset
         )
     }
 
@@ -43,6 +51,8 @@ object PrayerTimeMapper {
             PrayerSettings(
                 locationLatitude = entity.locationLatitude,
                 locationLongitude = entity.locationLongitude,
+                placeName = entity.placeName,
+                autoLocationEnabled = entity.autoLocationEnabled,
                 calculationMethod = try {
                     CalculationMethod.valueOf(entity.calculationMethod)
                 } catch (e: IllegalArgumentException) {
@@ -53,7 +63,13 @@ object PrayerTimeMapper {
                 } catch (e: IllegalArgumentException) {
                     Madhab.HANAFI
                 },
-                notificationsEnabled = entity.notificationsEnabled
+                notificationsEnabled = entity.notificationsEnabled,
+                fajrEnabled = entity.fajrEnabled,
+                dhuhrEnabled = entity.dhuhrEnabled,
+                asrEnabled = entity.asrEnabled,
+                maghribEnabled = entity.maghribEnabled,
+                ishaEnabled = entity.ishaEnabled,
+                hijriOffset = entity.hijriOffset
             )
         } else {
             PrayerSettings()

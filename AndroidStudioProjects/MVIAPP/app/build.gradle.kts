@@ -44,6 +44,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -58,6 +59,10 @@ android {
     lint {
         baseline = file("lint-baseline.xml")
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -119,4 +124,17 @@ dependencies {
 
     // DataStore - persists the signed-in session
     implementation(libs.androidx.datastore.preferences)
+
+    // Location - prayer times, Qibla
+    implementation(libs.play.services.location)
+
+    // Home screen widget
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
+
+    // Background work - nightly prayer recompute, budget checks, recurring transactions
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // Core library desugaring - java.time (Hijri calendar) on minSdk 24
+    coreLibraryDesugaring(libs.android.desugar.jdk.libs)
 }

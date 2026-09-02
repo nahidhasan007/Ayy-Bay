@@ -9,6 +9,7 @@ import com.ayybay.app.data.local.entity.AlarmEntity
 import com.ayybay.app.domain.model.Alarm
 import com.ayybay.app.domain.repository.AlarmRepository
 import com.ayybay.app.receiver.AlarmReceiver
+import com.ayybay.app.util.RequestCodes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.Calendar
@@ -65,7 +66,7 @@ class AlarmRepositoryImpl(
         val intent = Intent(context, AlarmReceiver::class.java).apply { action = ACTION_ALARM_RING }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            alarmId.toInt(),
+            RequestCodes.forUserAlarm(alarmId),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
         )
@@ -83,7 +84,7 @@ class AlarmRepositoryImpl(
         }
         return PendingIntent.getBroadcast(
             context,
-            alarmId.toInt(),
+            RequestCodes.forUserAlarm(alarmId),
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
