@@ -74,8 +74,8 @@ fun AddTransactionScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     var paymentMenuExpanded by remember { mutableStateOf(false) }
 
-    val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()) }
-    val weekdayFormat = remember { SimpleDateFormat("EEEE", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.US) }
+    val weekdayFormat = remember { SimpleDateFormat("EEEE", Locale.US) }
 
     val isEditing = transaction != null
     val categoryLabel = if (type == TransactionType.EXPENSE) selectedExpenseCategory.label else selectedIncomeCategory.label

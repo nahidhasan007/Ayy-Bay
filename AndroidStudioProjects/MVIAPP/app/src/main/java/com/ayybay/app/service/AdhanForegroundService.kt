@@ -16,6 +16,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.ayybay.app.MainActivity
 import com.ayybay.app.util.RequestCodes
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -67,7 +68,11 @@ class AdhanForegroundService : Service() {
     }
 
     private var currentPlayer: Ringtone? = null
-    private val serviceScope = CoroutineScope(Job() + Dispatchers.Main)
+    private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
+        // Backstop: an uncaught exception here must never crash the process while Adhan
+        // is playing over the lock screen.
+    }
+    private val serviceScope = CoroutineScope(Job() + Dispatchers.Main + exceptionHandler)
     private var isPlaying = false
     private var playbackJob: Job? = null
 
@@ -138,12 +143,18 @@ class AdhanForegroundService : Service() {
                 ringtone?.play()
                 currentPlayer = ringtone
             } catch (e: Exception) {
-                // Last resort: use notification sound
-                val notificationUri =
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                val ringtone = RingtoneManager.getRingtone(applicationContext, notificationUri)
-                ringtone?.play()
-                currentPlayer = ringtone
+                // Last resort: use notification sound. Also guarded -- this is the final
+                // fallback, so any failure here must not be allowed to crash the service;
+                // the notification is already showing even if no sound plays.
+                try {
+                    val notificationUri =
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                    val ringtone = RingtoneManager.getRingtone(applicationContext, notificationUri)
+                    ringtone?.play()
+                    currentPlayer = ringtone
+                } catch (e2: Exception) {
+                    // No audio could be played at all; the notification alone will have to do.
+                }
             }
         }
 
@@ -155,7 +166,12 @@ class AdhanForegroundService : Service() {
     }
 
     private fun stopAdhanPlayback() {
-        currentPlayer?.stop()
+        try {
+            currentPlayer?.stop()
+        } catch (e: Exception) {
+            // Ringtone.stop() can throw IllegalStateException on some OEM ROMs; the service
+            // is stopping either way, so this must never crash it.
+        }
         currentPlayer = null
         isPlaying = false
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -223,7 +239,12 @@ class AdhanForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        currentPlayer?.stop()
+        try {
+            currentPlayer?.stop()
+        } catch (e: Exception) {
+            // See stopAdhanPlayback() -- must never crash the service on teardown.
+        }
         currentPlayer = null
+        playbackJob?.cancel()
     }
 }

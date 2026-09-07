@@ -139,7 +139,7 @@ fun QuranProgressScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         val bars = weeklyReading.map { day ->
                             val label = if (language == AppLanguage.EN) {
-                                SimpleDateFormat("EEE", Locale.getDefault()).format(Date(day.dateKey))
+                                SimpleDateFormat("EEE", Locale.US).format(Date(day.dateKey))
                             } else {
                                 banglaWeekdayShort(Date(day.dateKey))
                             }

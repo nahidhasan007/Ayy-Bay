@@ -22,7 +22,11 @@ object PrayerTimeMapper {
 
     fun toDomain(entity: PrayerTimeEntity): PrayerTime {
         return PrayerTime(
-            prayerName = PrayerName.valueOf(entity.prayerName),
+            prayerName = try {
+                PrayerName.valueOf(entity.prayerName)
+            } catch (e: IllegalArgumentException) {
+                PrayerName.FAJR
+            },
             time = Date(entity.time),
             isEnabled = entity.isEnabled
         )

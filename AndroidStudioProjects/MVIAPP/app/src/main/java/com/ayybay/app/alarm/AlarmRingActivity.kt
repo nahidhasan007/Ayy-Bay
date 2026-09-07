@@ -44,7 +44,11 @@ class AlarmRingActivity : ComponentActivity() {
         setContent {
             var alarm by remember { mutableStateOf<Alarm?>(null) }
             LaunchedEffect(alarmId) {
-                alarm = alarmRepository.getAlarmById(alarmId)
+                alarm = try {
+                    alarmRepository.getAlarmById(alarmId)
+                } catch (e: Exception) {
+                    null
+                }
             }
 
             MVIAPPTheme {
@@ -108,9 +112,10 @@ private fun AlarmRingContent(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Bold
             )
-            if (!alarm?.label.isNullOrBlank()) {
+            val label = alarm?.label
+            if (!label.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = alarm!!.label, color = Color.White.copy(alpha = 0.85f), fontSize = 20.sp)
+                Text(text = label, color = Color.White.copy(alpha = 0.85f), fontSize = 20.sp)
             }
 
             Spacer(modifier = Modifier.height(64.dp))

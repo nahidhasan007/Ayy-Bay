@@ -23,6 +23,10 @@ class Converters {
 
     @TypeConverter
     fun toTransactionType(value: String): TransactionType {
-        return TransactionType.valueOf(value)
+        return try {
+            TransactionType.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            TransactionType.EXPENSE
+        }
     }
 }

@@ -66,6 +66,9 @@ class AlarmReceiver : BroadcastReceiver(), KoinComponent {
                         )
                     )
                 }
+            } catch (e: Exception) {
+                // Ringing/scheduling already happened above if we got that far; don't let a
+                // DB/notification error crash the process at the moment the alarm is ringing.
             } finally {
                 pendingResult.finish()
             }

@@ -308,7 +308,9 @@ fun AppNavigation(
                     notifications = notificationUiState.notifications,
                     onNotificationClick = { notification ->
                         notificationViewModel.handleIntent(NotificationUiIntent.MarkRead(notification.id))
-                        notification.deepLinkRoute?.let { route -> navController.navigate(route) }
+                        notification.deepLinkRoute?.let { route ->
+                            runCatching { navController.navigate(route) }
+                        }
                     },
                     onMarkAllRead = { notificationViewModel.handleIntent(NotificationUiIntent.MarkAllRead) },
                     onBack = { navController.popBackStack() }

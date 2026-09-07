@@ -39,7 +39,9 @@ class QuranProgressRepositoryImpl(
     override suspend fun getCurrentStreak(todayKey: Long, dayMillis: Long): Int {
         var streak = 0
         var cursor = todayKey
-        while (true) {
+        // Bounded defensively -- a streak longer than this is not realistically reachable,
+        // this just guarantees the loop can never run away on corrupted date-key data.
+        while (streak < MAX_STREAK_DAYS) {
             val day = quranProgressDao.getReadDay(cursor)
             if (day != null && day.surahsOpened > 0) {
                 streak++
@@ -49,6 +51,10 @@ class QuranProgressRepositoryImpl(
             }
         }
         return streak
+    }
+
+    private companion object {
+        const val MAX_STREAK_DAYS = 3650
     }
 
     private fun SurahProgressEntity.toDomain() = SurahProgress(

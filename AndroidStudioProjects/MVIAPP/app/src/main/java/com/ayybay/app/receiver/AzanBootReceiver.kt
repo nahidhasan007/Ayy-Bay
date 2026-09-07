@@ -21,11 +21,14 @@ class AzanBootReceiver : BroadcastReceiver(), KoinComponent {
 
         val action = intent?.action
         if (action == Intent.ACTION_BOOT_COMPLETED || action == "android.intent.action.QUICKBOOT_POWERON") {
+            val pendingResult = goAsync()
             scope.launch {
                 try {
                     schedulePrayerNotificationsUseCase()
                 } catch (e: Exception) {
                     // Log error if needed
+                } finally {
+                    pendingResult.finish()
                 }
             }
         }

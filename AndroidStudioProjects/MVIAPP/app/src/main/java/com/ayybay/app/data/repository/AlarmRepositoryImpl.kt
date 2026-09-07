@@ -120,7 +120,7 @@ class AlarmRepositoryImpl(
         minute = minute,
         label = label,
         isEnabled = isEnabled,
-        repeatDays = if (repeatDays.isBlank()) emptySet() else repeatDays.split(",").map { it.toInt() }.toSet(),
+        repeatDays = if (repeatDays.isBlank()) emptySet() else repeatDays.split(",").mapNotNull { it.toIntOrNull() }.toSet(),
         vibrate = vibrate,
         createdAt = createdAt
     )

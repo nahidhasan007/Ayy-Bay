@@ -96,7 +96,7 @@ fun NotificationCenterScreen(
 @Composable
 private fun NotificationRow(notification: AppNotification, onClick: () -> Unit) {
     val language = LocalAppLanguage.current
-    val timeFormat = remember { SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()) }
+    val timeFormat = remember { SimpleDateFormat("dd MMM, hh:mm a", Locale.US) }
     val title = if (language == AppLanguage.EN) notification.titleEn else notification.titleBn
     val body = if (language == AppLanguage.EN) notification.bodyEn else notification.bodyBn
 

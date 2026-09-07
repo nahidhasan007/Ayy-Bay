@@ -10,6 +10,7 @@ import com.ayybay.app.presentation.mvi.JobUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class JobsViewModel(
@@ -22,7 +23,7 @@ class JobsViewModel(
 
     init {
         viewModelScope.launch {
-            getBookmarkedJobIdsUseCase().collect { ids ->
+            getBookmarkedJobIdsUseCase().catch { }.collect { ids ->
                 _uiState.value = _uiState.value.copy(bookmarkedIds = ids)
             }
         }

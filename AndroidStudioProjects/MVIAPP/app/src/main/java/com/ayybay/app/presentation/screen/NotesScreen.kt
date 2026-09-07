@@ -134,7 +134,7 @@ private fun NoteCard(
     onTogglePin: () -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
-    val dateFormat = remember { SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("dd MMM, hh:mm a", Locale.US) }
 
     Card(
         modifier = Modifier

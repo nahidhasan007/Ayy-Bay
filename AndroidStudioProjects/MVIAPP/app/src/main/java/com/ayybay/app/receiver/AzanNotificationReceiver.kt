@@ -55,11 +55,16 @@ class AzanNotificationReceiver : BroadcastReceiver(), KoinComponent {
         val prayerName = intent.getStringExtra("prayer_name") ?: "Prayer Time"
         val currentTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
 
-        AdhanForegroundService.startAdhan(
-            context = context,
-            prayerName = prayerName,
-            durationSeconds = 90
-        )
+        try {
+            AdhanForegroundService.startAdhan(
+                context = context,
+                prayerName = prayerName,
+                durationSeconds = 90
+            )
+        } catch (e: Exception) {
+            // Audio failed to start (e.g. foreground-service start restrictions on some OEMs);
+            // still proceed to post the notification and reschedule below.
+        }
 
         val pendingResult = goAsync()
         scope.launch {
@@ -69,6 +74,9 @@ class AzanNotificationReceiver : BroadcastReceiver(), KoinComponent {
                 showNotification(context, prayerName, currentTime, language)
                 recordNotification(prayerName, currentTime)
                 schedulePrayerNotificationsUseCase()
+            } catch (e: Exception) {
+                // Never let a single prayer's notification/reschedule failure crash the
+                // process -- that would also prevent every future prayer from rescheduling.
             } finally {
                 pendingResult.finish()
             }

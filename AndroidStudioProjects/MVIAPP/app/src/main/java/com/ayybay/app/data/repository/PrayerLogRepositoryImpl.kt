@@ -29,7 +29,11 @@ class PrayerLogRepositoryImpl(
 
     private fun PrayerLogEntity.toDomain() = PrayerLog(
         dateKey = dateKey,
-        prayerName = PrayerName.valueOf(prayerName),
+        prayerName = try {
+            PrayerName.valueOf(prayerName)
+        } catch (e: IllegalArgumentException) {
+            PrayerName.FAJR
+        },
         isPrayed = isPrayed
     )
 }

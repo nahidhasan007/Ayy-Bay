@@ -123,7 +123,12 @@ class AlarmRingingService : Service() {
     }
 
     private fun stopRinging() {
-        ringtone?.stop()
+        try {
+            ringtone?.stop()
+        } catch (e: Exception) {
+            // Ringtone.stop() can throw IllegalStateException on some OEM ROMs; the service
+            // is stopping either way, so this must never crash it.
+        }
         ringtone = null
         vibrator?.cancel()
         vibrator = null
@@ -171,7 +176,11 @@ class AlarmRingingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        ringtone?.stop()
+        try {
+            ringtone?.stop()
+        } catch (e: Exception) {
+            // See stopRinging() -- must never crash the service on teardown.
+        }
         ringtone = null
         vibrator?.cancel()
         vibrator = null

@@ -11,6 +11,7 @@ import com.ayybay.app.presentation.mvi.NotificationUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class NotificationViewModel(
@@ -25,12 +26,12 @@ class NotificationViewModel(
 
     init {
         viewModelScope.launch {
-            getNotificationsUseCase().collect { list ->
+            getNotificationsUseCase().catch { }.collect { list ->
                 _uiState.value = _uiState.value.copy(notifications = list)
             }
         }
         viewModelScope.launch {
-            getUnreadNotificationCountUseCase().collect { count ->
+            getUnreadNotificationCountUseCase().catch { }.collect { count ->
                 _uiState.value = _uiState.value.copy(unreadCount = count)
             }
         }

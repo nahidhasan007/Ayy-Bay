@@ -33,7 +33,7 @@ fun AgeCalculatorScreen(
     onBack: () -> Unit
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.US) }
     val now = remember { System.currentTimeMillis() }
     val breakdown = remember(dateOfBirth, now) { dateOfBirth?.let { calculateAge(it, now) } }
 
@@ -124,7 +124,14 @@ fun AgeCalculatorScreen(
     }
 
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = dateOfBirth ?: now)
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = dateOfBirth ?: now,
+            selectableDates = remember(now) {
+                object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis <= now
+                }
+            }
+        )
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {

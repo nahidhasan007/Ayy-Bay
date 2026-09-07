@@ -46,7 +46,7 @@ fun SalahTrackerScreen(
     onBack: () -> Unit
 ) {
     val language = LocalAppLanguage.current
-    val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
+    val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.US) }
     val prayedCount = todayPrayerLogs.values.count { it }
     val total = PrayerName.entries.size
     val sortedPrayers = remember(prayerTimes) { prayerTimes.sortedBy { it.prayerName.ordinal } }
@@ -134,11 +134,11 @@ fun SalahTrackerScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         val bars = weeklyProgress.map { day ->
                             val label = if (language == AppLanguage.EN) {
-                                SimpleDateFormat("EEE", Locale.getDefault()).format(Date(day.dateKey))
+                                SimpleDateFormat("EEE", Locale.US).format(Date(day.dateKey))
                             } else {
                                 banglaWeekdayShort(Date(day.dateKey))
                             }
-                            label to (day.prayedCount.toFloat() / day.total)
+                            label to (if (day.total > 0) day.prayedCount.toFloat() / day.total else 0f)
                         }
                         WeeklyBarChart(bars = bars, barColor = IslamicGreen)
                         Spacer(modifier = Modifier.height(8.dp))

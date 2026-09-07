@@ -29,6 +29,7 @@ import com.ayybay.app.presentation.language.LocalAppLanguage
 import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.ui.theme.AlarmPurple
 import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,7 +156,7 @@ private fun AlarmCard(
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "%02d:%02d".format(alarm.hour, alarm.minute),
+                    text = String.format(Locale.US, "%02d:%02d", alarm.hour, alarm.minute),
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.titleLarge
                 )

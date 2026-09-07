@@ -25,6 +25,7 @@ import com.ayybay.app.presentation.language.tr
 import com.ayybay.app.presentation.util.bmiOf
 import com.ayybay.app.presentation.util.calculateAge
 import com.ayybay.app.presentation.util.categoryOf
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,8 +108,8 @@ fun FitnessAdviceScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = tr(
-                                "BMI ${String.format("%.1f", bmi)} (${category.displayName})" + (ageYears?.let { " · Age $it" } ?: ""),
-                                "বিএমআই ${String.format("%.1f", bmi)} (${category.label()})" + (ageYears?.let { " · বয়স $it" } ?: "")
+                                "BMI ${String.format(Locale.US, "%.1f", bmi)} (${category.displayName})" + (ageYears?.let { " · Age $it" } ?: ""),
+                                "বিএমআই ${String.format(Locale.US, "%.1f", bmi)} (${category.label()})" + (ageYears?.let { " · বয়স $it" } ?: "")
                             ),
                             fontWeight = FontWeight.SemiBold
                         )

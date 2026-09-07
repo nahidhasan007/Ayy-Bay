@@ -165,14 +165,14 @@ private fun MonthSelector(month: Int, year: Int, onSelect: (Int, Int) -> Unit) {
         val cal = Calendar.getInstance()
         cal.set(Calendar.MONTH, month - 1)
         cal.set(Calendar.YEAR, year)
-        SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(cal.time)
+        SimpleDateFormat("MMMM yyyy", Locale.US).format(cal.time)
     }
     val options = remember {
         val cal = Calendar.getInstance()
         (0 until 12).map {
             val m = cal.get(Calendar.MONTH) + 1
             val y = cal.get(Calendar.YEAR)
-            val display = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(cal.time)
+            val display = SimpleDateFormat("MMMM yyyy", Locale.US).format(cal.time)
             cal.add(Calendar.MONTH, -1)
             Triple(m, y, display)
         }

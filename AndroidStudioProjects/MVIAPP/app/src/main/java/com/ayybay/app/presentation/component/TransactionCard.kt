@@ -150,6 +150,6 @@ fun TransactionCard(
 }
 
 private fun formatDate(date: Date): String {
-    val formatter = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
+    val formatter = SimpleDateFormat("dd MMM, hh:mm a", Locale.US)
     return formatter.format(date)
 }

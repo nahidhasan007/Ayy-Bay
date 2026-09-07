@@ -24,6 +24,7 @@ import com.ayybay.app.presentation.util.BmiCategory
 import com.ayybay.app.presentation.util.bmiOf
 import com.ayybay.app.presentation.util.categoryOf
 import com.ayybay.app.presentation.util.healthyWeightRange
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,7 +118,7 @@ fun BmiCalculatorScreen(
                         ) {
                             Text(text = tr("Your BMI", "আপনার বিএমআই"), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(
-                                text = String.format("%.1f", bmi),
+                                text = String.format(Locale.US, "%.1f", bmi),
                                 style = MaterialTheme.typography.displaySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = category.color

@@ -304,7 +304,11 @@ class LinkRepositoryImpl(
         title = title,
         description = description,
         url = url,
-        category = LinkCategory.valueOf(category),
+        category = try {
+            LinkCategory.valueOf(category)
+        } catch (e: IllegalArgumentException) {
+            LinkCategory.OTHER
+        },
         addedDate = addedDate
     )
 

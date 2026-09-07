@@ -418,8 +418,8 @@ private fun PrayerCountdownCard(
 ) {
     val now by rememberTickingNow()
     val language = LocalAppLanguage.current
-    val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy | EEEE", Locale.getDefault()) }
-    val clockFormat = remember { SimpleDateFormat("hh:mm:ss a", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("dd MMMM yyyy | EEEE", Locale.US) }
+    val clockFormat = remember { SimpleDateFormat("hh:mm:ss a", Locale.US) }
     val nextPrayer = remember(prayerTimes, now) { nextPrayerOf(prayerTimes, now) }
 
     Card(
@@ -498,7 +498,7 @@ private fun PrayerTable(
     prayerTimes: List<PrayerTime>,
     onToggleNotification: (PrayerName, Boolean) -> Unit
 ) {
-    val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
+    val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.US) }
     val now by rememberTickingNow(tickMillis = 30_000L)
     val nextPrayer = remember(prayerTimes, now) { nextPrayerOf(prayerTimes, now) }
     val sorted = remember(prayerTimes) { prayerTimes.sortedBy { it.prayerName.ordinal } }

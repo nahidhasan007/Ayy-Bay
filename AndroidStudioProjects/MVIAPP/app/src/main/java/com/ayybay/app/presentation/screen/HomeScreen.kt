@@ -140,8 +140,8 @@ private fun HomeHeader(
 ) {
     val today = remember { Date() }
     val language = LocalAppLanguage.current
-    val englishDateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()) }
-    val englishWeekdayFormat = remember { SimpleDateFormat("EEEE", Locale.getDefault()) }
+    val englishDateFormat = remember { SimpleDateFormat("dd MMMM yyyy", Locale.US) }
+    val englishWeekdayFormat = remember { SimpleDateFormat("EEEE", Locale.US) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -276,7 +276,7 @@ private fun NextPrayerCard(
 ) {
     val context = LocalContext.current
     val now by rememberTickingNow()
-    val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
+    val timeFormat = remember { SimpleDateFormat("hh:mm a", Locale.US) }
     val sortedPrayers = remember(prayerTimes) { prayerTimes.sortedBy { it.prayerName.ordinal } }
     val nextPrayer = remember(prayerTimes, now) { nextPrayerOf(prayerTimes, now) }
     val allEnabled = prayerTimes.isNotEmpty() && prayerTimes.all { it.isEnabled }
