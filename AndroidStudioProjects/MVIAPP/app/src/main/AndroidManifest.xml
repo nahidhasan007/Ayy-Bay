@@ -102,6 +102,12 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Quran Reading Plan Reminder - Triggered daily by AlarmManager to check plan progress -->
+        <receiver
+            android:name=".receiver.QuranPlanReminderReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
         <!-- Alarm Ringing Service - Plays the alarm sound/vibration until stopped or snoozed -->
         <service
             android:name=".service.AlarmRingingService"

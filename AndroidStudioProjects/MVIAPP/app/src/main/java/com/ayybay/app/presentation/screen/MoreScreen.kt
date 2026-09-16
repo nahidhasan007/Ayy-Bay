@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import com.ayybay.app.ui.theme.BalanceOrange
 import com.ayybay.app.ui.theme.ExpenseRed
 import com.ayybay.app.ui.theme.IncomeGreen
 import com.ayybay.app.ui.theme.InfoBlue
+import com.ayybay.app.ui.theme.IslamicGold
 import com.ayybay.app.ui.theme.IslamicGreen
 
 private data class MoreItem(
@@ -52,6 +54,7 @@ fun MoreScreen(
     onNavigateNotes: () -> Unit,
     onNavigateSalahTracker: () -> Unit,
     onNavigateQuranProgress: () -> Unit,
+    onNavigateQuranReadingPlan: () -> Unit,
     onNavigateAgeCalculator: () -> Unit,
     onNavigateBmiCalculator: () -> Unit,
     onNavigateFitnessAdvice: () -> Unit,
@@ -65,6 +68,7 @@ fun MoreScreen(
         MoreItem("Alarms", "অ্যালার্ম", "Set alarms and reminders", "অ্যালার্ম ও রিমাইন্ডার সেট করুন", Icons.Default.Alarm, AlarmPurple, onNavigateAlarms),
         MoreItem("Salah Tracker", "নামাজ ট্র্যাকার", "Track daily prayers and weekly progress", "দৈনিক নামাজ ও সাপ্তাহিক অগ্রগতি ট্র্যাক করুন", Icons.Default.Mosque, IslamicGreen, onNavigateSalahTracker),
         MoreItem("Quran Progress", "কুরআন অগ্রগতি", "Track Quran reading completion", "কুরআন পড়ার অগ্রগতি ট্র্যাক করুন", Icons.AutoMirrored.Filled.MenuBook, IslamicGreen, onNavigateQuranProgress),
+        MoreItem("Quran Reading Plan", "কুরআন পড়ার পরিকল্পনা", "Finish the Quran in 15 days, 1, 2 or 3 months", "১৫ দিন, ১, ২ বা ৩ মাসে কুরআন সম্পন্ন করুন", Icons.Default.CalendarMonth, IslamicGold, onNavigateQuranReadingPlan),
         MoreItem("Age Calculator", "বয়স ক্যালকুলেটর", "Calculate your exact age", "আপনার সঠিক বয়স হিসাব করুন", Icons.Default.Cake, IncomeGreen, onNavigateAgeCalculator),
         MoreItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", "Check your body mass index", "আপনার বডি মাস ইনডেক্স যাচাই করুন", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator),
         MoreItem("Fitness Advice", "ফিটনেস পরামর্শ", "Personalized diet and exercise tips", "ব্যক্তিগত ডায়েট ও ব্যায়ামের পরামর্শ", Icons.Default.FitnessCenter, ExpenseRed, onNavigateFitnessAdvice),

@@ -18,6 +18,7 @@ import com.ayybay.app.data.repository.NotificationRepositoryImpl
 import com.ayybay.app.data.repository.NoteRepositoryImpl
 import com.ayybay.app.data.repository.PrayerLogRepositoryImpl
 import com.ayybay.app.data.repository.QuranProgressRepositoryImpl
+import com.ayybay.app.data.repository.QuranReadingPlanRepositoryImpl
 import com.ayybay.app.data.repository.TransactionRepositoryImpl
 import com.ayybay.app.data.repository.PrayerTimeRepositoryImpl
 import com.ayybay.app.domain.repository.AlarmRepository
@@ -29,6 +30,7 @@ import com.ayybay.app.domain.repository.NotificationRepository
 import com.ayybay.app.domain.repository.NoteRepository
 import com.ayybay.app.domain.repository.PrayerLogRepository
 import com.ayybay.app.domain.repository.QuranProgressRepository
+import com.ayybay.app.domain.repository.QuranReadingPlanRepository
 import com.ayybay.app.domain.repository.TransactionRepository
 import com.ayybay.app.domain.repository.PrayerTimeRepository
 import com.ayybay.app.domain.usecase.*
@@ -41,6 +43,7 @@ import com.ayybay.app.presentation.viewmodel.LinkViewModel
 import com.ayybay.app.presentation.viewmodel.NotificationViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
+import com.ayybay.app.presentation.viewmodel.QuranPlanViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
@@ -61,6 +64,7 @@ val appModule = module {
     single { get<AppDatabase>().alarmDao() }
     single { get<AppDatabase>().jobBookmarkDao() }
     single { get<AppDatabase>().appNotificationDao() }
+    single { get<AppDatabase>().quranReadingPlanDao() }
 
     // Prayer Calculator
     single { PrayerTimeCalculator() }
@@ -80,6 +84,7 @@ val appModule = module {
     single<NoteRepository> { NoteRepositoryImpl(get()) }
     single<PrayerLogRepository> { PrayerLogRepositoryImpl(get()) }
     single<QuranProgressRepository> { QuranProgressRepositoryImpl(get()) }
+    single<QuranReadingPlanRepository> { QuranReadingPlanRepositoryImpl(quranReadingPlanDao = get(), context = androidContext()) }
     single<AlarmRepository> { AlarmRepositoryImpl(alarmDao = get(), context = androidContext()) }
     single<ContactRepository> { ContactRepositoryImpl(androidContext()) }
     single<JobBookmarkRepository> { JobBookmarkRepositoryImpl(get()) }
@@ -142,6 +147,14 @@ val appModule = module {
     factory { MarkSurahReadUseCase(get()) }
     factory { GetQuranWeeklyReadingUseCase(get()) }
     factory { GetQuranStreakUseCase(get()) }
+
+    // Use Cases - Quran Reading Plan
+    factory { GetQuranReadingPlanUseCase(get()) }
+    factory { GetQuranReadingPlanStatusUseCase(get(), get()) }
+    factory { StartQuranReadingPlanUseCase(get()) }
+    factory { CancelQuranReadingPlanUseCase(get()) }
+    factory { UpdateReadingPlanReminderTimeUseCase(get()) }
+    factory { RescheduleQuranPlanReminderUseCase(get()) }
 
     // Use Cases - Alarms
     factory { GetAllAlarmsUseCase(get()) }
@@ -235,6 +248,15 @@ val appModule = module {
     }
 
     viewModel { HealthViewModel(healthPreferences = get()) }
+
+    viewModel {
+        QuranPlanViewModel(
+            getQuranReadingPlanStatusUseCase = get(),
+            startQuranReadingPlanUseCase = get(),
+            cancelQuranReadingPlanUseCase = get(),
+            updateReadingPlanReminderTimeUseCase = get()
+        )
+    }
 
     viewModel {
         AlarmViewModel(

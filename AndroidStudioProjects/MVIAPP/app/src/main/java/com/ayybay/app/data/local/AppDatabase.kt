@@ -16,6 +16,7 @@ import com.ayybay.app.data.local.entity.PrayerLogEntity
 import com.ayybay.app.data.local.entity.PrayerSettingsEntity
 import com.ayybay.app.data.local.entity.PrayerTimeEntity
 import com.ayybay.app.data.local.entity.QuranReadDayEntity
+import com.ayybay.app.data.local.entity.QuranReadingPlanEntity
 import com.ayybay.app.data.local.entity.SurahProgressEntity
 
 @Database(
@@ -30,9 +31,10 @@ import com.ayybay.app.data.local.entity.SurahProgressEntity
         QuranReadDayEntity::class,
         AlarmEntity::class,
         JobBookmarkEntity::class,
-        AppNotificationEntity::class
+        AppNotificationEntity::class,
+        QuranReadingPlanEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -47,6 +49,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun alarmDao(): AlarmDao
     abstract fun jobBookmarkDao(): JobBookmarkDao
     abstract fun appNotificationDao(): AppNotificationDao
+    abstract fun quranReadingPlanDao(): QuranReadingPlanDao
 
     companion object {
         private const val DATABASE_NAME = "ayybay_database"
@@ -202,6 +205,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `quran_reading_plan` (
+                        `id` INTEGER PRIMARY KEY NOT NULL,
+                        `durationDays` INTEGER NOT NULL,
+                        `startDateKey` INTEGER NOT NULL,
+                        `reminderHour` INTEGER NOT NULL,
+                        `reminderMinute` INTEGER NOT NULL,
+                        `lastMissedNotifiedDateKey` INTEGER NOT NULL DEFAULT 0
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -209,7 +229,10 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+                    .addMigrations(
+                        MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6,
+                        MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9
+                    )
                     .build()
                 INSTANCE = instance
                 instance

@@ -26,6 +26,7 @@ import com.ayybay.app.presentation.mvi.AuthUiIntent
 import com.ayybay.app.presentation.mvi.LinkUiIntent
 import com.ayybay.app.presentation.mvi.NoteUiIntent
 import com.ayybay.app.presentation.mvi.NotificationUiIntent
+import com.ayybay.app.presentation.mvi.QuranPlanUiIntent
 import com.ayybay.app.presentation.mvi.TrackerUiIntent
 import com.ayybay.app.presentation.mvi.TransactionUiIntent
 import com.ayybay.app.presentation.screen.AddAlarmScreen
@@ -51,6 +52,7 @@ import com.ayybay.app.presentation.screen.PhoneBookScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
 import com.ayybay.app.presentation.screen.ProfileScreen
 import com.ayybay.app.presentation.screen.QuranProgressScreen
+import com.ayybay.app.presentation.screen.QuranReadingPlanScreen
 import com.ayybay.app.presentation.screen.SalahTrackerScreen
 import com.ayybay.app.presentation.screen.SignUpScreen
 import com.ayybay.app.presentation.screen.SurahListScreen
@@ -65,6 +67,7 @@ import com.ayybay.app.presentation.viewmodel.NotificationViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
+import com.ayybay.app.presentation.viewmodel.QuranPlanViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 
@@ -105,6 +108,7 @@ sealed class Screen(val route: String) {
     }
     object SalahTracker : Screen("salah_tracker")
     object QuranProgress : Screen("quran_progress")
+    object QuranReadingPlan : Screen("quran_reading_plan")
     object AgeCalculator : Screen("age_calculator")
     object BmiCalculator : Screen("bmi_calculator")
     object FitnessAdvice : Screen("fitness_advice")
@@ -133,7 +137,8 @@ fun AppNavigation(
     alarmViewModel: AlarmViewModel,
     phoneBookViewModel: PhoneBookViewModel,
     jobsViewModel: JobsViewModel,
-    notificationViewModel: NotificationViewModel
+    notificationViewModel: NotificationViewModel,
+    quranPlanViewModel: QuranPlanViewModel
 ) {
     val authUiState by authViewModel.uiState.collectAsState()
 
@@ -184,6 +189,7 @@ fun AppNavigation(
     val phoneBookUiState by phoneBookViewModel.uiState.collectAsState()
     val jobUiState by jobsViewModel.uiState.collectAsState()
     val notificationUiState by notificationViewModel.uiState.collectAsState()
+    val quranPlanUiState by quranPlanViewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         alarmViewModel.uiEffect.collect { effect ->
@@ -490,6 +496,7 @@ fun AppNavigation(
                     onNavigateNotes = { navController.navigate(Screen.Notes.route) },
                     onNavigateSalahTracker = { navController.navigate(Screen.SalahTracker.route) },
                     onNavigateQuranProgress = { navController.navigate(Screen.QuranProgress.route) },
+                    onNavigateQuranReadingPlan = { navController.navigate(Screen.QuranReadingPlan.route) },
                     onNavigateAgeCalculator = { navController.navigate(Screen.AgeCalculator.route) },
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onNavigateFitnessAdvice = { navController.navigate(Screen.FitnessAdvice.route) },
@@ -575,6 +582,21 @@ fun AppNavigation(
                     totalSurahs = QuranSurahData.surahs().size,
                     streakDays = trackerUiState.quranStreak,
                     weeklyReading = trackerUiState.quranWeeklyReading,
+                    onOpenSurahList = { navController.navigate(Screen.SurahList.route) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.QuranReadingPlan.route) {
+                QuranReadingPlanScreen(
+                    status = quranPlanUiState.status,
+                    onStartPlan = { durationDays, hour, minute ->
+                        quranPlanViewModel.handleIntent(QuranPlanUiIntent.StartPlan(durationDays, hour, minute))
+                    },
+                    onUpdateReminderTime = { hour, minute ->
+                        quranPlanViewModel.handleIntent(QuranPlanUiIntent.UpdateReminderTime(hour, minute))
+                    },
+                    onCancelPlan = { quranPlanViewModel.handleIntent(QuranPlanUiIntent.CancelPlan) },
                     onOpenSurahList = { navController.navigate(Screen.SurahList.route) },
                     onBack = { navController.popBackStack() }
                 )

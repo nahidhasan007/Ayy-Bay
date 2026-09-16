@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.ayybay.app.domain.usecase.RescheduleAllAlarmsUseCase
+import com.ayybay.app.domain.usecase.RescheduleQuranPlanReminderUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,6 +16,7 @@ class AlarmBootReceiver : BroadcastReceiver(), KoinComponent {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val rescheduleAllAlarmsUseCase: RescheduleAllAlarmsUseCase by inject()
+    private val rescheduleQuranPlanReminderUseCase: RescheduleQuranPlanReminderUseCase by inject()
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null) return
@@ -25,6 +27,7 @@ class AlarmBootReceiver : BroadcastReceiver(), KoinComponent {
             scope.launch {
                 try {
                     rescheduleAllAlarmsUseCase()
+                    rescheduleQuranPlanReminderUseCase()
                 } catch (e: Exception) {
                     // Log error if needed
                 } finally {

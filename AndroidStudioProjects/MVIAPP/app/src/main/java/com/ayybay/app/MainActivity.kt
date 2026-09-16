@@ -29,6 +29,7 @@ import com.ayybay.app.presentation.viewmodel.NotificationViewModel
 import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
+import com.ayybay.app.presentation.viewmodel.QuranPlanViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.ui.theme.MVIAPPTheme
@@ -48,6 +49,7 @@ class MainActivity : ComponentActivity() {
     private val phoneBookViewModel: PhoneBookViewModel by viewModel()
     private val jobsViewModel: JobsViewModel by viewModel()
     private val notificationViewModel: NotificationViewModel by viewModel()
+    private val quranPlanViewModel: QuranPlanViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +74,8 @@ class MainActivity : ComponentActivity() {
                             alarmViewModel = alarmViewModel,
                             phoneBookViewModel = phoneBookViewModel,
                             jobsViewModel = jobsViewModel,
-                            notificationViewModel = notificationViewModel
+                            notificationViewModel = notificationViewModel,
+                            quranPlanViewModel = quranPlanViewModel
                         )
                     }
                 }
