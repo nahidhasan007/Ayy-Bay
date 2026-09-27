@@ -10,13 +10,14 @@ fun LoginScreen(
     onGoogleSignIn: () -> Unit,
     onNavigateToSignUp: () -> Unit,
     onDismissError: () -> Unit,
-    onContinueAsGuest: () -> Unit
+    onContinueAsGuest: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit = {}
 ) {
     AuthScaffold(
         title = tr("Welcome back", "আবার স্বাগতম"),
         subtitle = tr(
-            "Sign in to sync your prayers, finances\nand saved links.",
-            "নামাজ, হিসাব ও সংরক্ষিত লিংক সিঙ্ক করতে সাইন ইন করুন।"
+            "Sign in to personalize your prayers,\nfinances and saved links.",
+            "নামাজ, হিসাব ও সংরক্ষিত লিংক ব্যক্তিগত করতে সাইন ইন করুন।"
         ),
         error = error,
         onDismissError = onDismissError,
@@ -34,6 +35,7 @@ fun LoginScreen(
                 onClick = onNavigateToSignUp
             )
         },
-        onContinueAsGuest = onContinueAsGuest
+        onContinueAsGuest = onContinueAsGuest,
+        onOpenPrivacyPolicy = onOpenPrivacyPolicy
     )
 }

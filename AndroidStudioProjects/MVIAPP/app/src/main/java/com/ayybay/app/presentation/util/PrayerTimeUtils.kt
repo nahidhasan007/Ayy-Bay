@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import com.ayybay.app.domain.model.PrayerTime
 import kotlinx.coroutines.delay
 import java.util.Date
+import java.util.Locale
 
 /** Ticks every [tickMillis] so countdowns stay live while a screen is visible. */
 @Composable
@@ -43,5 +44,5 @@ fun formatCountdown(diffMs: Long): String {
     val hours = totalSeconds / 3600
     val minutes = (totalSeconds % 3600) / 60
     val seconds = totalSeconds % 60
-    return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+    return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
 }

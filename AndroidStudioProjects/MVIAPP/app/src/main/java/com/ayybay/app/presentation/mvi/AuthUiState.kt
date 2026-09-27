@@ -7,6 +7,7 @@ data class AuthUiState(
     val isGuest: Boolean = false,
     val isCheckingSession: Boolean = true,
     val isSigningIn: Boolean = false,
+    val isDeletingAccount: Boolean = false,
     val error: String? = null
 ) {
     val isLoggedIn: Boolean get() = user != null || isGuest

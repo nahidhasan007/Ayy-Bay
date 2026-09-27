@@ -6,8 +6,7 @@
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Pre-API-31 counterpart to data_extraction_rules.xml: keep the cached Google
+         sign-in session out of backups on older devices too. -->
+    <exclude domain="file" path="datastore/auth_prefs.preferences_pb" />
 </full-backup-content>

@@ -6,17 +6,21 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
+import com.ayybay.app.data.local.AppDatabase
 import com.ayybay.app.data.local.AuthPreferences
 import com.ayybay.app.domain.model.AuthUser
 import com.ayybay.app.domain.repository.AuthRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class AuthRepositoryImpl(
     private val authPreferences: AuthPreferences,
+    private val appDatabase: AppDatabase,
     private val webClientId: String
 ) : AuthRepository {
 
@@ -64,6 +68,13 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun signOut() {
+        authPreferences.clearUser()
+    }
+
+    override suspend fun deleteAccountAndData() {
+        withContext(Dispatchers.IO) {
+            appDatabase.clearAllTables()
+        }
         authPreferences.clearUser()
     }
 

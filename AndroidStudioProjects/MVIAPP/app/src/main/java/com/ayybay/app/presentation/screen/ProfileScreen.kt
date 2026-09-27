@@ -1,5 +1,6 @@
 package com.ayybay.app.presentation.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -7,8 +8,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,9 +32,44 @@ import com.ayybay.app.ui.theme.IslamicGreen
 fun ProfileScreen(
     userName: String,
     userEmail: String?,
+    isDeletingAccount: Boolean = false,
     onBack: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit = {},
+    onOpenPrivacyPolicy: () -> Unit = {}
 ) {
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            icon = { Icon(Icons.Filled.DeleteForever, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text(tr("Delete account & data?", "অ্যাকাউন্ট ও ডেটা মুছবেন?")) },
+            text = {
+                Text(
+                    tr(
+                        "This permanently deletes everything stored on this device -- transactions, notes, prayer logs, Quran progress, bookmarks -- and signs you out. This can't be undone.",
+                        "এতে এই ডিভাইসে সংরক্ষিত সবকিছু (লেনদেন, নোট, নামাজের হিসাব, কুরআন অগ্রগতি, বুকমার্ক) স্থায়ীভাবে মুছে যাবে এবং আপনি সাইন আউট হয়ে যাবেন। এটি ফিরিয়ে আনা যাবে না।"
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        onDeleteAccount()
+                    }
+                ) {
+                    Text(tr("Delete everything", "সব মুছে ফেলুন"), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text(tr("Cancel", "বাতিল করুন"))
+                }
+            }
+        )
+    }
     Scaffold(
         topBar = {
             AppTopBar(
@@ -114,6 +155,13 @@ fun ProfileScreen(
                 }
             }
 
+            TextButton(
+                onClick = onOpenPrivacyPolicy,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(tr("Privacy Policy", "প্রাইভেসি পলিসি"))
+            }
+
             OutlinedButton(
                 onClick = onSignOut,
                 modifier = Modifier.fillMaxWidth(),
@@ -122,6 +170,22 @@ fun ProfileScreen(
                 Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(tr("Sign out", "সাইন আউট"))
+            }
+
+            OutlinedButton(
+                onClick = { showDeleteConfirm = true },
+                enabled = !isDeletingAccount,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+            ) {
+                if (isDeletingAccount) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.error)
+                } else {
+                    Icon(Icons.Filled.DeleteForever, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(tr("Delete account & data", "অ্যাকাউন্ট ও ডেটা মুছুন"))
             }
         }
     }

@@ -10,7 +10,8 @@ fun SignUpScreen(
     onGoogleSignUp: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onDismissError: () -> Unit,
-    onContinueAsGuest: () -> Unit
+    onContinueAsGuest: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit = {}
 ) {
     AuthScaffold(
         title = tr("Create your account", "আপনার অ্যাকাউন্ট তৈরি করুন"),
@@ -34,6 +35,7 @@ fun SignUpScreen(
                 onClick = onNavigateToLogin
             )
         },
-        onContinueAsGuest = onContinueAsGuest
+        onContinueAsGuest = onContinueAsGuest,
+        onOpenPrivacyPolicy = onOpenPrivacyPolicy
     )
 }

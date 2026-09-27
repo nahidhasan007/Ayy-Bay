@@ -95,6 +95,7 @@ val appModule = module {
     single<AuthRepository> {
         AuthRepositoryImpl(
             authPreferences = get(),
+            appDatabase = get(),
             webClientId = androidContext().getString(R.string.google_web_client_id)
         )
     }
@@ -129,6 +130,7 @@ val appModule = module {
     factory { ObserveAuthUserUseCase(get()) }
     factory { SignInWithGoogleUseCase(get()) }
     factory { SignOutUseCase(get()) }
+    factory { DeleteAccountUseCase(get()) }
 
     // Use Cases - Notes
     factory { GetAllNotesUseCase(get()) }
@@ -219,7 +221,8 @@ val appModule = module {
         AuthViewModel(
             observeAuthUserUseCase = get(),
             signInWithGoogleUseCase = get(),
-            signOutUseCase = get()
+            signOutUseCase = get(),
+            deleteAccountUseCase = get()
         )
     }
 

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android blocks plain HTTP by default for the in-app WebView (LinkWebViewScreen). Two seeded
+  Bangladesh government resources in the Daily Links list are only reachable over HTTP, so they
+  need an explicit cleartext allowance. Everything else in the app still requires HTTPS.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">educationboardresults.gov.bd</domain>
+        <domain includeSubdomains="true">hospitaldghs.gov.bd</domain>
+    </domain-config>
+</network-security-config>

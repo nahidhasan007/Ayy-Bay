@@ -52,7 +52,8 @@ fun AuthScaffold(
     onDismissError: () -> Unit,
     primaryAction: @Composable () -> Unit,
     footer: @Composable () -> Unit,
-    onContinueAsGuest: (() -> Unit)? = null
+    onContinueAsGuest: (() -> Unit)? = null,
+    onOpenPrivacyPolicy: () -> Unit = {}
 ) {
     Scaffold(
         snackbarHost = {
@@ -133,7 +134,17 @@ fun AuthScaffold(
                 lineHeight = 15.sp
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextButton(onClick = onOpenPrivacyPolicy) {
+                Text(
+                    text = tr("Privacy Policy", "প্রাইভেসি পলিসি"),
+                    fontSize = 12.sp,
+                    color = IslamicGreen
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             footer()
 

@@ -50,6 +50,7 @@ import com.ayybay.app.presentation.screen.NotesScreen
 import com.ayybay.app.presentation.screen.NotificationCenterScreen
 import com.ayybay.app.presentation.screen.PhoneBookScreen
 import com.ayybay.app.presentation.screen.PrayerTimesScreen
+import com.ayybay.app.presentation.screen.PrivacyPolicyScreen
 import com.ayybay.app.presentation.screen.ProfileScreen
 import com.ayybay.app.presentation.screen.QuranProgressScreen
 import com.ayybay.app.presentation.screen.QuranReadingPlanScreen
@@ -102,6 +103,7 @@ sealed class Screen(val route: String) {
     }
     object More : Screen("more")
     object Profile : Screen("profile")
+    object PrivacyPolicy : Screen("privacy_policy")
     object Notes : Screen("notes")
     object AddNote : Screen("add_note?noteId={noteId}") {
         fun createRoute(noteId: Long = -1L) = "add_note?noteId=$noteId"
@@ -245,7 +247,8 @@ fun AppNavigation(
                     onGoogleSignIn = { authViewModel.handleIntent(AuthUiIntent.SignInWithGoogle(context)) },
                     onNavigateToSignUp = { navController.navigate(Screen.SignUp.route) },
                     onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) },
-                    onContinueAsGuest = { authViewModel.handleIntent(AuthUiIntent.ContinueAsGuest) }
+                    onContinueAsGuest = { authViewModel.handleIntent(AuthUiIntent.ContinueAsGuest) },
+                    onOpenPrivacyPolicy = { navController.navigate(Screen.PrivacyPolicy.route) }
                 )
             }
 
@@ -257,7 +260,8 @@ fun AppNavigation(
                     onGoogleSignUp = { authViewModel.handleIntent(AuthUiIntent.SignInWithGoogle(context)) },
                     onNavigateToLogin = { navController.popBackStack() },
                     onDismissError = { authViewModel.handleIntent(AuthUiIntent.ClearError) },
-                    onContinueAsGuest = { authViewModel.handleIntent(AuthUiIntent.ContinueAsGuest) }
+                    onContinueAsGuest = { authViewModel.handleIntent(AuthUiIntent.ContinueAsGuest) },
+                    onOpenPrivacyPolicy = { navController.navigate(Screen.PrivacyPolicy.route) }
                 )
             }
 
@@ -327,9 +331,16 @@ fun AppNavigation(
                 ProfileScreen(
                     userName = authUiState.user?.displayName ?: tr("Guest", "অতিথি"),
                     userEmail = authUiState.user?.email,
+                    isDeletingAccount = authUiState.isDeletingAccount,
                     onBack = { navController.popBackStack() },
-                    onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
+                    onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) },
+                    onDeleteAccount = { authViewModel.handleIntent(AuthUiIntent.DeleteAccount) },
+                    onOpenPrivacyPolicy = { navController.navigate(Screen.PrivacyPolicy.route) }
                 )
+            }
+
+            composable(Screen.PrivacyPolicy.route) {
+                PrivacyPolicyScreen(onBack = { navController.popBackStack() })
             }
 
             composable(Screen.Finance.route) {

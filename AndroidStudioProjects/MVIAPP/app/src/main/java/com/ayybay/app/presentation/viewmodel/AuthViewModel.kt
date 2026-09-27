@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ayybay.app.domain.usecase.DeleteAccountUseCase
 import com.ayybay.app.domain.usecase.ObserveAuthUserUseCase
 import com.ayybay.app.domain.usecase.SignInWithGoogleUseCase
 import com.ayybay.app.domain.usecase.SignOutUseCase
@@ -21,7 +22,8 @@ import kotlinx.coroutines.launch
 class AuthViewModel(
     private val observeAuthUserUseCase: ObserveAuthUserUseCase,
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
-    private val signOutUseCase: SignOutUseCase
+    private val signOutUseCase: SignOutUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -43,6 +45,7 @@ class AuthViewModel(
             is AuthUiIntent.SignInWithGoogle -> signIn(intent.context)
             is AuthUiIntent.ContinueAsGuest -> continueAsGuest()
             is AuthUiIntent.SignOut -> signOut()
+            is AuthUiIntent.DeleteAccount -> deleteAccount()
             is AuthUiIntent.ClearError -> _uiState.value = _uiState.value.copy(error = null)
         }
     }
@@ -78,6 +81,16 @@ class AuthViewModel(
         viewModelScope.launch {
             signOutUseCase()
             _uiState.value = _uiState.value.copy(isGuest = false)
+            _uiEffect.emit(AuthUiEffect.NavigateToLogin)
+        }
+    }
+
+    private fun deleteAccount() {
+        if (_uiState.value.isDeletingAccount) return
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isDeletingAccount = true)
+            deleteAccountUseCase()
+            _uiState.value = _uiState.value.copy(isDeletingAccount = false, isGuest = false)
             _uiEffect.emit(AuthUiEffect.NavigateToLogin)
         }
     }

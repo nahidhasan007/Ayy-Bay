@@ -5,15 +5,11 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <!-- Exclude the cached Google sign-in session: it holds another service's auth
+             claims and shouldn't ride along in an Android cloud backup. -->
+        <exclude domain="file" path="datastore/auth_prefs.preferences_pb" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="file" path="datastore/auth_prefs.preferences_pb" />
     </device-transfer>
-    -->
 </data-extraction-rules>
