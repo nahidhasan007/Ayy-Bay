@@ -2,7 +2,10 @@
 
 All notable changes to Jibon, tracked against the `versionCode` shown in Profile.
 
-## Unreleased (pre-launch, still versionCode 1 / 1.0)
+## Unreleased (pre-launch, versionCode 1 / 1.0.0)
+
+- Fixed release build failure: `AndroidManifest.xml` referenced a non-existent
+  `@mipmap/app_icon`; it now points back at the adaptive `@mipmap/ic_launcher`.
 
 - Replaced the launcher icon with a proper Android adaptive icon built from the real
   "Jibon" brand mark (safe-zone-inset foreground + solid brand-green background),
