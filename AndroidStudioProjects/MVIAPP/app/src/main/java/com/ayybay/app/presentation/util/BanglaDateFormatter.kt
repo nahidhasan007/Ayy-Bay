@@ -23,6 +23,11 @@ private val banglaWeekdays = mapOf(
 fun toBanglaNumber(number: Int): String =
     number.toString().map { c -> if (c.isDigit()) banglaDigits[c - '0'] else c }.joinToString("")
 
+fun formatBanglaMonthYear(date: Date): String {
+    val cal = Calendar.getInstance().apply { time = date }
+    return "${banglaMonths[cal.get(Calendar.MONTH)]} ${toBanglaNumber(cal.get(Calendar.YEAR))}"
+}
+
 fun formatBanglaDate(date: Date): String {
     val cal = Calendar.getInstance().apply { time = date }
     val day = toBanglaNumber(cal.get(Calendar.DAY_OF_MONTH))

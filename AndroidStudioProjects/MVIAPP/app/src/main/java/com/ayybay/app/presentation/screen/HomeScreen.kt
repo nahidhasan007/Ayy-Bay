@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Mosque
@@ -82,6 +83,7 @@ fun HomeScreen(
     onNavigateNotes: () -> Unit = {},
     onNavigateSalahTracker: () -> Unit = {},
     onNavigateBmiCalculator: () -> Unit = {},
+    onNavigateStepTracker: () -> Unit = {},
     onNavigateProfile: () -> Unit = {},
     onSignOut: () -> Unit = {}
 ) {
@@ -120,7 +122,8 @@ fun HomeScreen(
                     onNavigateBooks = onNavigateBooks,
                     onNavigateNotes = onNavigateNotes,
                     onNavigateSalahTracker = onNavigateSalahTracker,
-                    onNavigateBmiCalculator = onNavigateBmiCalculator
+                    onNavigateBmiCalculator = onNavigateBmiCalculator,
+                    onNavigateStepTracker = onNavigateStepTracker
                 )
             }
 
@@ -439,7 +442,8 @@ private fun QuickAccessSection(
     onNavigateBooks: () -> Unit,
     onNavigateNotes: () -> Unit,
     onNavigateSalahTracker: () -> Unit,
-    onNavigateBmiCalculator: () -> Unit
+    onNavigateBmiCalculator: () -> Unit,
+    onNavigateStepTracker: () -> Unit
 ) {
     Column {
         Text(
@@ -458,7 +462,8 @@ private fun QuickAccessSection(
         val secondRow = listOf(
             QuickAccessItem("Notes", "নোট", Icons.Default.Description, IncomeGreen, onNavigateNotes),
             QuickAccessItem("Salah Tracker", "নামাজ ট্র্যাকার", Icons.Default.Mosque, IncomeGreen, onNavigateSalahTracker),
-            QuickAccessItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator)
+            QuickAccessItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator),
+            QuickAccessItem("Step Tracker", "স্টেপ ট্র্যাকার", Icons.Default.DirectionsWalk, IncomeGreen, onNavigateStepTracker)
         )
 
         Row(

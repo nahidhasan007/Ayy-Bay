@@ -2,6 +2,8 @@ package com.ayybay.app
 
 import android.app.Application
 import com.ayybay.app.di.appModule
+import com.ayybay.app.util.StepPermission
+import com.ayybay.app.worker.StepSyncWorker
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -16,5 +18,7 @@ class AyyBayApplication : Application() {
             androidContext(this@AyyBayApplication)
             modules(appModule)
         }
+
+        if (StepPermission.isGranted(this)) StepSyncWorker.schedule(this)
     }
 }

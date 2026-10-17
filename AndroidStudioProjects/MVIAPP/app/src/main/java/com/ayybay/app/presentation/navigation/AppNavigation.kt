@@ -55,6 +55,9 @@ import com.ayybay.app.presentation.screen.ProfileScreen
 import com.ayybay.app.presentation.screen.QuranProgressScreen
 import com.ayybay.app.presentation.screen.QuranReadingPlanScreen
 import com.ayybay.app.presentation.screen.SalahTrackerScreen
+import com.ayybay.app.presentation.screen.StepTrackerScreen
+import com.ayybay.app.presentation.viewmodel.StepViewModel
+import com.ayybay.app.worker.StepSyncWorker
 import com.ayybay.app.presentation.screen.SignUpScreen
 import com.ayybay.app.presentation.screen.SurahListScreen
 import com.ayybay.app.presentation.screen.SurahWebViewScreen
@@ -114,6 +117,7 @@ sealed class Screen(val route: String) {
     object AgeCalculator : Screen("age_calculator")
     object BmiCalculator : Screen("bmi_calculator")
     object FitnessAdvice : Screen("fitness_advice")
+    object StepTracker : Screen("step_tracker")
     object PhoneBook : Screen("phone_book")
     object Alarms : Screen("alarms")
     object AddAlarm : Screen("add_alarm?alarmId={alarmId}") {
@@ -136,12 +140,14 @@ fun AppNavigation(
     noteViewModel: NoteViewModel,
     trackerViewModel: TrackerViewModel,
     healthViewModel: HealthViewModel,
+    stepViewModel: StepViewModel,
     alarmViewModel: AlarmViewModel,
     phoneBookViewModel: PhoneBookViewModel,
     jobsViewModel: JobsViewModel,
     notificationViewModel: NotificationViewModel,
     quranPlanViewModel: QuranPlanViewModel
 ) {
+    val context = LocalContext.current
     val authUiState by authViewModel.uiState.collectAsState()
 
     if (authUiState.isCheckingSession) {
@@ -187,6 +193,7 @@ fun AppNavigation(
     val noteUiState by noteViewModel.uiState.collectAsState()
     val trackerUiState by trackerViewModel.uiState.collectAsState()
     val healthUiState by healthViewModel.uiState.collectAsState()
+    val stepUiState by stepViewModel.uiState.collectAsState()
     val alarmUiState by alarmViewModel.uiState.collectAsState()
     val phoneBookUiState by phoneBookViewModel.uiState.collectAsState()
     val jobUiState by jobsViewModel.uiState.collectAsState()
@@ -207,6 +214,7 @@ fun AppNavigation(
             kotlinx.coroutines.delay(60_000L)
             prayerViewModel.refreshDay()
             trackerViewModel.refreshDay()
+            stepViewModel.refreshDay()
         }
     }
 
@@ -308,6 +316,7 @@ fun AppNavigation(
                     onNavigateNotes = { navController.navigate(Screen.Notes.route) },
                     onNavigateSalahTracker = { navController.navigate(Screen.SalahTracker.route) },
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
+                    onNavigateStepTracker = { navController.navigate(Screen.StepTracker.route) },
                     onNavigateProfile = { navController.navigate(Screen.Profile.route) },
                     onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
                 )
@@ -511,6 +520,7 @@ fun AppNavigation(
                     onNavigateAgeCalculator = { navController.navigate(Screen.AgeCalculator.route) },
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onNavigateFitnessAdvice = { navController.navigate(Screen.FitnessAdvice.route) },
+                    onNavigateStepTracker = { navController.navigate(Screen.StepTracker.route) },
                     onNavigateWebsites = { navController.navigate(Screen.DailyLinks.route) },
                     onNavigatePhoneBook = { navController.navigate(Screen.PhoneBook.route) },
                     onNavigateAlarms = { navController.navigate(Screen.Alarms.route) }
@@ -629,6 +639,23 @@ fun AppNavigation(
                         healthViewModel.setHeightCm(heightCm)
                         healthViewModel.setWeightKg(weightKg)
                     },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.StepTracker.route) {
+                StepTrackerScreen(
+                    uiState = stepUiState,
+                    heightCm = healthUiState.heightCm,
+                    onPermissionResult = { granted ->
+                        stepViewModel.onPermissionResult(granted)
+                        if (granted) StepSyncWorker.schedule(context.applicationContext)
+                    },
+                    onStartTracking = { stepViewModel.startLiveTracking() },
+                    onStopTracking = { stepViewModel.stopLiveTracking() },
+                    onSetGoal = { stepViewModel.setDailyGoal(it) },
+                    onPreviousMonth = { stepViewModel.showPreviousMonth() },
+                    onNextMonth = { stepViewModel.showNextMonth() },
                     onBack = { navController.popBackStack() }
                 )
             }

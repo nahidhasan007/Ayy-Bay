@@ -31,6 +31,12 @@
     <!-- Phone Book: read contacts to call them (calling itself is done via ACTION_DIAL, no CALL_PHONE needed) -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
+    <!-- Step tracker: read the device step counter (runtime permission on Android 10+) -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-feature
+        android:name="android.hardware.sensor.stepcounter"
+        android:required="false" />
+
     <!-- Alarms: show the full-screen ringing UI over the lock screen -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 

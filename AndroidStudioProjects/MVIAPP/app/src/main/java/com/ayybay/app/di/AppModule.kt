@@ -8,6 +8,11 @@ import com.ayybay.app.data.local.AppDatabase
 import com.ayybay.app.data.location.LocationProvider
 import com.ayybay.app.data.local.AuthPreferences
 import com.ayybay.app.data.local.HealthPreferences
+import com.ayybay.app.data.local.StepPreferences
+import com.ayybay.app.data.repository.StepRepositoryImpl
+import com.ayybay.app.data.sensor.StepSensor
+import com.ayybay.app.domain.repository.StepRepository
+import com.ayybay.app.presentation.viewmodel.StepViewModel
 import com.ayybay.app.data.local.LanguagePreferences
 import com.ayybay.app.data.repository.AlarmRepositoryImpl
 import com.ayybay.app.data.repository.AuthRepositoryImpl
@@ -65,6 +70,7 @@ val appModule = module {
     single { get<AppDatabase>().jobBookmarkDao() }
     single { get<AppDatabase>().appNotificationDao() }
     single { get<AppDatabase>().quranReadingPlanDao() }
+    single { get<AppDatabase>().stepDao() }
 
     // Prayer Calculator
     single { PrayerTimeCalculator() }
@@ -105,6 +111,11 @@ val appModule = module {
 
     // Health (Age / BMI / Fitness)
     single { HealthPreferences(androidContext()) }
+
+    // Step tracker (hardware step counter -> daily/monthly steps)
+    single { StepPreferences(androidContext()) }
+    single { StepSensor(androidContext()) }
+    single<StepRepository> { StepRepositoryImpl(stepDao = get(), stepSensor = get(), stepPreferences = get()) }
 
     // Use Cases - Transaction
     factory { GetAllTransactionsUseCase(get()) }
@@ -251,6 +262,8 @@ val appModule = module {
     }
 
     viewModel { HealthViewModel(healthPreferences = get()) }
+
+    viewModel { StepViewModel(stepRepository = get()) }
 
     viewModel {
         QuranPlanViewModel(

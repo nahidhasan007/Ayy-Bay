@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Public
@@ -58,6 +59,7 @@ fun MoreScreen(
     onNavigateAgeCalculator: () -> Unit,
     onNavigateBmiCalculator: () -> Unit,
     onNavigateFitnessAdvice: () -> Unit,
+    onNavigateStepTracker: () -> Unit,
     onNavigateWebsites: () -> Unit,
     onNavigatePhoneBook: () -> Unit,
     onNavigateAlarms: () -> Unit
@@ -72,6 +74,7 @@ fun MoreScreen(
         MoreItem("Age Calculator", "বয়স ক্যালকুলেটর", "Calculate your exact age", "আপনার সঠিক বয়স হিসাব করুন", Icons.Default.Cake, IncomeGreen, onNavigateAgeCalculator),
         MoreItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", "Check your body mass index", "আপনার বডি মাস ইনডেক্স যাচাই করুন", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator),
         MoreItem("Fitness Advice", "ফিটনেস পরামর্শ", "Personalized diet and exercise tips", "ব্যক্তিগত ডায়েট ও ব্যায়ামের পরামর্শ", Icons.Default.FitnessCenter, ExpenseRed, onNavigateFitnessAdvice),
+        MoreItem("Step Tracker", "স্টেপ ট্র্যাকার", "Daily and monthly steps, converted to km", "দৈনিক ও মাসিক পদক্ষেপ, কিলোমিটারে", Icons.Default.DirectionsWalk, IncomeGreen, onNavigateStepTracker),
         MoreItem("Useful Websites", "গুরুত্বপূর্ণ ওয়েবসাইট", "Government, news, jobs and more", "সরকারি, সংবাদ, চাকরি ও আরও অনেক কিছু", Icons.Default.Public, InfoBlue, onNavigateWebsites)
     )
 
