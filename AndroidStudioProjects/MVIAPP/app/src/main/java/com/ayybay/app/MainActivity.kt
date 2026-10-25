@@ -30,7 +30,9 @@ import com.ayybay.app.presentation.viewmodel.NoteViewModel
 import com.ayybay.app.presentation.viewmodel.PhoneBookViewModel
 import com.ayybay.app.presentation.viewmodel.PrayerViewModel
 import com.ayybay.app.presentation.viewmodel.QuranPlanViewModel
+import com.ayybay.app.presentation.viewmodel.LearningViewModel
 import com.ayybay.app.presentation.viewmodel.StepViewModel
+import com.ayybay.app.presentation.viewmodel.WeatherViewModel
 import com.ayybay.app.presentation.viewmodel.TrackerViewModel
 import com.ayybay.app.presentation.viewmodel.TransactionViewModel
 import com.ayybay.app.ui.theme.MVIAPPTheme
@@ -47,6 +49,8 @@ class MainActivity : ComponentActivity() {
     private val trackerViewModel: TrackerViewModel by viewModel()
     private val healthViewModel: HealthViewModel by viewModel()
     private val stepViewModel: StepViewModel by viewModel()
+    private val weatherViewModel: WeatherViewModel by viewModel()
+    private val learningViewModel: LearningViewModel by viewModel()
     private val alarmViewModel: AlarmViewModel by viewModel()
     private val phoneBookViewModel: PhoneBookViewModel by viewModel()
     private val jobsViewModel: JobsViewModel by viewModel()
@@ -74,6 +78,8 @@ class MainActivity : ComponentActivity() {
                             trackerViewModel = trackerViewModel,
                             healthViewModel = healthViewModel,
                             stepViewModel = stepViewModel,
+                            weatherViewModel = weatherViewModel,
+                            learningViewModel = learningViewModel,
                             alarmViewModel = alarmViewModel,
                             phoneBookViewModel = phoneBookViewModel,
                             jobsViewModel = jobsViewModel,

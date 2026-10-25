@@ -8,6 +8,13 @@ import com.ayybay.app.data.local.AppDatabase
 import com.ayybay.app.data.location.LocationProvider
 import com.ayybay.app.data.local.AuthPreferences
 import com.ayybay.app.data.local.HealthPreferences
+import com.ayybay.app.data.local.LearningPreferences
+import com.ayybay.app.data.local.WeatherPreferences
+import com.ayybay.app.data.remote.OpenMeteoClient
+import com.ayybay.app.data.repository.WeatherRepositoryImpl
+import com.ayybay.app.domain.repository.WeatherRepository
+import com.ayybay.app.presentation.viewmodel.LearningViewModel
+import com.ayybay.app.presentation.viewmodel.WeatherViewModel
 import com.ayybay.app.data.local.StepPreferences
 import com.ayybay.app.data.repository.StepRepositoryImpl
 import com.ayybay.app.data.sensor.StepSensor
@@ -116,6 +123,16 @@ val appModule = module {
     single { StepPreferences(androidContext()) }
     single { StepSensor(androidContext()) }
     single<StepRepository> { StepRepositoryImpl(stepDao = get(), stepSensor = get(), stepPreferences = get()) }
+
+    // Weather (Open-Meteo forecast + rain alerts)
+    single { WeatherPreferences(androidContext()) }
+    single { OpenMeteoClient() }
+    single<WeatherRepository> {
+        WeatherRepositoryImpl(client = get(), weatherPreferences = get(), prayerTimeRepository = get())
+    }
+
+    // Daily Learning (bundled content; progress in DataStore)
+    single { LearningPreferences(androidContext()) }
 
     // Use Cases - Transaction
     factory { GetAllTransactionsUseCase(get()) }
@@ -264,6 +281,10 @@ val appModule = module {
     viewModel { HealthViewModel(healthPreferences = get()) }
 
     viewModel { StepViewModel(stepRepository = get()) }
+
+    viewModel { WeatherViewModel(weatherRepository = get(), appContext = androidContext()) }
+
+    viewModel { LearningViewModel(learningPreferences = get(), appContext = androidContext()) }
 
     viewModel {
         QuranPlanViewModel(

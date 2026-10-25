@@ -56,6 +56,11 @@ import com.ayybay.app.presentation.screen.QuranProgressScreen
 import com.ayybay.app.presentation.screen.QuranReadingPlanScreen
 import com.ayybay.app.presentation.screen.SalahTrackerScreen
 import com.ayybay.app.presentation.screen.StepTrackerScreen
+import com.ayybay.app.presentation.screen.DailyLearningScreen
+import com.ayybay.app.presentation.screen.DailyQuizScreen
+import com.ayybay.app.presentation.screen.WeatherScreen
+import com.ayybay.app.presentation.viewmodel.LearningViewModel
+import com.ayybay.app.presentation.viewmodel.WeatherViewModel
 import com.ayybay.app.presentation.viewmodel.StepViewModel
 import com.ayybay.app.worker.StepSyncWorker
 import com.ayybay.app.presentation.screen.SignUpScreen
@@ -118,6 +123,9 @@ sealed class Screen(val route: String) {
     object BmiCalculator : Screen("bmi_calculator")
     object FitnessAdvice : Screen("fitness_advice")
     object StepTracker : Screen("step_tracker")
+    object Weather : Screen("weather")
+    object DailyLearning : Screen("daily_learning")
+    object DailyQuiz : Screen("daily_quiz")
     object PhoneBook : Screen("phone_book")
     object Alarms : Screen("alarms")
     object AddAlarm : Screen("add_alarm?alarmId={alarmId}") {
@@ -141,6 +149,8 @@ fun AppNavigation(
     trackerViewModel: TrackerViewModel,
     healthViewModel: HealthViewModel,
     stepViewModel: StepViewModel,
+    weatherViewModel: WeatherViewModel,
+    learningViewModel: LearningViewModel,
     alarmViewModel: AlarmViewModel,
     phoneBookViewModel: PhoneBookViewModel,
     jobsViewModel: JobsViewModel,
@@ -194,6 +204,8 @@ fun AppNavigation(
     val trackerUiState by trackerViewModel.uiState.collectAsState()
     val healthUiState by healthViewModel.uiState.collectAsState()
     val stepUiState by stepViewModel.uiState.collectAsState()
+    val weatherUiState by weatherViewModel.uiState.collectAsState()
+    val learningUiState by learningViewModel.uiState.collectAsState()
     val alarmUiState by alarmViewModel.uiState.collectAsState()
     val phoneBookUiState by phoneBookViewModel.uiState.collectAsState()
     val jobUiState by jobsViewModel.uiState.collectAsState()
@@ -215,6 +227,7 @@ fun AppNavigation(
             prayerViewModel.refreshDay()
             trackerViewModel.refreshDay()
             stepViewModel.refreshDay()
+            learningViewModel.refreshDay()
         }
     }
 
@@ -317,6 +330,8 @@ fun AppNavigation(
                     onNavigateSalahTracker = { navController.navigate(Screen.SalahTracker.route) },
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onNavigateStepTracker = { navController.navigate(Screen.StepTracker.route) },
+                    onNavigateWeather = { navController.navigate(Screen.Weather.route) },
+                    onNavigateDailyLearning = { navController.navigate(Screen.DailyLearning.route) },
                     onNavigateProfile = { navController.navigate(Screen.Profile.route) },
                     onSignOut = { authViewModel.handleIntent(AuthUiIntent.SignOut) }
                 )
@@ -521,6 +536,8 @@ fun AppNavigation(
                     onNavigateBmiCalculator = { navController.navigate(Screen.BmiCalculator.route) },
                     onNavigateFitnessAdvice = { navController.navigate(Screen.FitnessAdvice.route) },
                     onNavigateStepTracker = { navController.navigate(Screen.StepTracker.route) },
+                    onNavigateWeather = { navController.navigate(Screen.Weather.route) },
+                    onNavigateDailyLearning = { navController.navigate(Screen.DailyLearning.route) },
                     onNavigateWebsites = { navController.navigate(Screen.DailyLinks.route) },
                     onNavigatePhoneBook = { navController.navigate(Screen.PhoneBook.route) },
                     onNavigateAlarms = { navController.navigate(Screen.Alarms.route) }
@@ -639,6 +656,42 @@ fun AppNavigation(
                         healthViewModel.setHeightCm(heightCm)
                         healthViewModel.setWeightKg(weightKg)
                     },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.Weather.route) {
+                LaunchedEffect(Unit) { weatherViewModel.refreshIfStale() }
+                WeatherScreen(
+                    uiState = weatherUiState,
+                    onRefresh = { weatherViewModel.refresh() },
+                    onSetAlertsEnabled = { weatherViewModel.setAlertsEnabled(it) },
+                    onSetThreshold = { weatherViewModel.setAlertThreshold(it) },
+                    onSelectLocation = { weatherViewModel.setLocation(it) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.DailyLearning.route) {
+                DailyLearningScreen(
+                    uiState = learningUiState,
+                    onSetLearned = { id, learned -> learningViewModel.setLearned(id, learned) },
+                    onStartQuiz = {
+                        learningViewModel.startQuiz()
+                        navController.navigate(Screen.DailyQuiz.route)
+                    },
+                    onSetReminderEnabled = { learningViewModel.setReminderEnabled(it) },
+                    onSetReminderHour = { learningViewModel.setReminderHour(it) },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.DailyQuiz.route) {
+                DailyQuizScreen(
+                    session = learningUiState.quiz,
+                    onSelectAnswer = { learningViewModel.selectAnswer(it) },
+                    onNext = { learningViewModel.nextQuestion() },
+                    onStartQuiz = { learningViewModel.startQuiz() },
                     onBack = { navController.popBackStack() }
                 )
             }

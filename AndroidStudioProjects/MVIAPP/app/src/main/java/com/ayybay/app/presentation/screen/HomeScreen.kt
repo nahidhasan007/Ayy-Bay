@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MonitorWeight
@@ -84,6 +86,8 @@ fun HomeScreen(
     onNavigateSalahTracker: () -> Unit = {},
     onNavigateBmiCalculator: () -> Unit = {},
     onNavigateStepTracker: () -> Unit = {},
+    onNavigateWeather: () -> Unit = {},
+    onNavigateDailyLearning: () -> Unit = {},
     onNavigateProfile: () -> Unit = {},
     onSignOut: () -> Unit = {}
 ) {
@@ -123,7 +127,9 @@ fun HomeScreen(
                     onNavigateNotes = onNavigateNotes,
                     onNavigateSalahTracker = onNavigateSalahTracker,
                     onNavigateBmiCalculator = onNavigateBmiCalculator,
-                    onNavigateStepTracker = onNavigateStepTracker
+                    onNavigateStepTracker = onNavigateStepTracker,
+                    onNavigateWeather = onNavigateWeather,
+                    onNavigateDailyLearning = onNavigateDailyLearning
                 )
             }
 
@@ -443,7 +449,9 @@ private fun QuickAccessSection(
     onNavigateNotes: () -> Unit,
     onNavigateSalahTracker: () -> Unit,
     onNavigateBmiCalculator: () -> Unit,
-    onNavigateStepTracker: () -> Unit
+    onNavigateStepTracker: () -> Unit,
+    onNavigateWeather: () -> Unit,
+    onNavigateDailyLearning: () -> Unit
 ) {
     Column {
         Text(
@@ -465,6 +473,10 @@ private fun QuickAccessSection(
             QuickAccessItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator),
             QuickAccessItem("Step Tracker", "স্টেপ ট্র্যাকার", Icons.Default.DirectionsWalk, IncomeGreen, onNavigateStepTracker)
         )
+        val thirdRow = listOf(
+            QuickAccessItem("Weather", "আবহাওয়া", Icons.Default.WbSunny, Color(0xFF1976D2), onNavigateWeather),
+            QuickAccessItem("Daily Learning", "দৈনিক শিক্ষা", Icons.Default.School, IncomeGreen, onNavigateDailyLearning)
+        )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -483,6 +495,16 @@ private fun QuickAccessSection(
                 QuickAccessTile(item = item, modifier = Modifier.weight(1f))
             }
             repeat(firstRow.size - secondRow.size) { Spacer(modifier = Modifier.weight(1f)) }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            thirdRow.forEach { item ->
+                QuickAccessTile(item = item, modifier = Modifier.weight(1f))
+            }
+            repeat(firstRow.size - thirdRow.size) { Spacer(modifier = Modifier.weight(1f)) }
         }
     }
 }

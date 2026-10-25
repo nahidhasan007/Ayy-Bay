@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -60,6 +62,8 @@ fun MoreScreen(
     onNavigateBmiCalculator: () -> Unit,
     onNavigateFitnessAdvice: () -> Unit,
     onNavigateStepTracker: () -> Unit,
+    onNavigateWeather: () -> Unit,
+    onNavigateDailyLearning: () -> Unit,
     onNavigateWebsites: () -> Unit,
     onNavigatePhoneBook: () -> Unit,
     onNavigateAlarms: () -> Unit
@@ -75,6 +79,8 @@ fun MoreScreen(
         MoreItem("BMI Calculator", "বিএমআই ক্যালকুলেটর", "Check your body mass index", "আপনার বডি মাস ইনডেক্স যাচাই করুন", Icons.Default.MonitorWeight, BalanceOrange, onNavigateBmiCalculator),
         MoreItem("Fitness Advice", "ফিটনেস পরামর্শ", "Personalized diet and exercise tips", "ব্যক্তিগত ডায়েট ও ব্যায়ামের পরামর্শ", Icons.Default.FitnessCenter, ExpenseRed, onNavigateFitnessAdvice),
         MoreItem("Step Tracker", "স্টেপ ট্র্যাকার", "Daily and monthly steps, converted to km", "দৈনিক ও মাসিক পদক্ষেপ, কিলোমিটারে", Icons.Default.DirectionsWalk, IncomeGreen, onNavigateStepTracker),
+        MoreItem("Weather & Rain Alerts", "আবহাওয়া ও বৃষ্টির সতর্কতা", "Forecast and alerts before it rains", "পূর্বাভাস ও বৃষ্টির আগে সতর্কতা", Icons.Default.WbSunny, InfoBlue, onNavigateWeather),
+        MoreItem("Daily Learning", "দৈনিক শিক্ষা", "A verse, a word, a fact and a quiz every day", "প্রতিদিন একটি আয়াত/হাদিস, শব্দ, তথ্য ও কুইজ", Icons.Default.School, IslamicGold, onNavigateDailyLearning),
         MoreItem("Useful Websites", "গুরুত্বপূর্ণ ওয়েবসাইট", "Government, news, jobs and more", "সরকারি, সংবাদ, চাকরি ও আরও অনেক কিছু", Icons.Default.Public, InfoBlue, onNavigateWebsites)
     )
 

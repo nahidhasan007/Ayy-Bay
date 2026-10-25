@@ -18,6 +18,8 @@ object RequestCodes {
     const val WIDGET_REFRESH = 1300
     const val ADHAN_STOP_ACTION = 1400
     const val QURAN_PLAN_REMINDER = 1500
+    const val RAIN_ALERT = 1600
+    const val LEARNING_REMINDER = 1700
     private const val ALARM_BASE = 2000            // 2000+: one per user Alarm.id
 
     fun forPrayer(prayerOrdinal: Int): Int = PRAYER_BASE + prayerOrdinal
